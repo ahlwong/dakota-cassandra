@@ -11,9 +11,9 @@ var nm_ = require('underscore');
 // = Tests to Run =
 // ================
 var RUN_TESTS = {
-  keyspaces: true,
+  keyspaces: false,
   tables: false,
-  models: false,
+  models: true,
   queries: false
 };
 
@@ -109,61 +109,71 @@ var dakota = new nmDakota(options);
   var schema = new nmDakota.Schema(schemaDefinition, {});
   var table = new nmTable(dakota, 'user_tests', schema, {});
   
-  // create table if not exists
-  table.create(function(err) {
+  // drop table
+  table.drop(function(err, result) {
     if (err) {
-      console.log('Error creating table: ' + err + '.');
+      console.log('Error dropping table: ' + err + '.');
     }
     else {
-      console.log('Created table successfully.');
+      console.log('Dropped table successfully.');
       
-      // retrieve table schema from system table
-      table.selectSchema(function(err) {
+      // create table if not exists
+      table.create(function(err) {
         if (err) {
-          console.log('Error getting table schema: ' + err + '.');
+          console.log('Error creating table: ' + err + '.');
         }
         else {
-          console.log('Retrieved table schema successfully.');
+          console.log('Created table successfully.');
           
-          // alter table
-          table.addColumn('new_column', 'map<text,text>', function(err) {
+          // retrieve table schema from system table
+          table.selectSchema(function(err) {
             if (err) {
-              console.log('Error adding column: ' + err + '.');
+              console.log('Error getting table schema: ' + err + '.');
             }
             else {
-              console.log('Added column successfully.');
+              console.log('Retrieved table schema successfully.');
               
               // alter table
-              table.renameColumn('new_column', 'old_column', function(err) {
+              table.addColumn('new_column', 'map<text,text>', function(err) {
                 if (err) {
-                  console.log('Error renaming column: ' + err + '.');
+                  console.log('Error adding column: ' + err + '.');
                 }
                 else {
-                  console.log('Renamed column successfully.');
+                  console.log('Added column successfully.');
                   
                   // alter table
-                  table.alterType('old_column', 'map<blob,blob>', function(err) {
+                  table.renameColumn('id', 'id_new', function(err) {
                     if (err) {
-                      console.log('Error changing type of column: ' + err + '.');
+                      console.log('Error renaming column: ' + err + '.');
                     }
                     else {
-                      console.log('Changed type of column successfully.');
+                      console.log('Renamed column successfully.');
                       
                       // alter table
-                      table.dropColumn('old_column', function(err) {
+                      table.alterType('new_column', 'map<blob,blob>', function(err) {
                         if (err) {
-                          console.log('Error dropping column: ' + err + '.');
+                          console.log('Error changing type of column: ' + err + '.');
                         }
                         else {
-                          console.log('Dropped column successfully.');
+                          console.log('Changed type of column successfully.');
                           
-                          // drop table
-                          table.drop(function(err, result) {
+                          // alter table
+                          table.dropColumn('new_column', function(err) {
                             if (err) {
-                              console.log('Error dropping table: ' + err + '.');
+                              console.log('Error dropping column: ' + err + '.');
                             }
                             else {
-                              console.log('Dropped table successfully.');
+                              console.log('Dropped column successfully.');
+                              
+                              // drop table
+                              table.drop(function(err, result) {
+                                if (err) {
+                                  console.log('Error dropping table: ' + err + '.');
+                                }
+                                else {
+                                  console.log('Dropped table successfully.');
+                                }
+                              });
                             }
                           });
                         }
@@ -175,9 +185,9 @@ var dakota = new nmDakota(options);
             }
           });
         }
-      });
+      }, { ifNotExists: true });
     }
-  }, { ifNotExists: true });
+  }, { ifExists: true });
   
 })(RUN_TESTS.tables);
 
@@ -215,18 +225,6 @@ var dakota = new nmDakota(options);
     }
   });
   
-  User.first(function(err, result) {
-    if (err) {
-      console.log('Error retrieving first user.');
-    }
-    else {
-      if (result && !(result instanceof User)) {
-        console.log('Error result object not instance of User.');
-      }
-      console.log('Successfully retrieved first user.');
-    }
-  });
-  
   User.all(function(err, result) {
     if (err) {
       console.log('Error retrieving all users.');
@@ -241,46 +239,62 @@ var dakota = new nmDakota(options);
     }
   });
   
-  User.where(email, 'test@test.test').allowFiltering(true).eachRow(
-    function(n, row) {
-      if (!(row instanceof User)) {
-        console.log('Error result object not instance of User.');
-      }
-      console.log('Retrieved row: ' + n);
-    },
-    function(err) {
-      if (err) {
-        console.log('Error retrieving all users by each row: ' + err + '.');
-      }
-      else {
-        console.log('Successfully retrieved users by each row.');
-      }
-    }
-  );
-  
-  var user = new User({ id: nmDakota.generateUUID(), name: 'dakota user', loc: 'San Francisco', email: 'dakota@dakota.dakota' });
-  user.save(function(err) {
+  // first
+  User.first(function(err, result) {
     if (err) {
-      console.log('Error creating user: ' + err + '.');
+      console.log('Error retrieving first user.');
     }
     else {
-      user.email = 'dakota@alexanderwong.me';
-      user.name = 'Dakota Wong';
-      user.save(function(err) {
-        if (err) {
-          console.log('Error updating user: ' + err + '.');
+      if (result && !(result instanceof User)) {
+        console.log('Error result object not instance of User.');
+      }
+      console.log('Successfully retrieved first user.');
+      
+      // each row
+      User.where({ id: result.id, name: result.name }).allowFiltering(true).eachRow(
+        function(n, row) {
+          if (!(row instanceof User)) {
+            console.log('Error result object not instance of User.');
+          }
+          console.log('Retrieved row: ' + n);
+        },
+        function(err) {
+          if (err) {
+            console.log('Error retrieving all users by each row: ' + err + '.');
+          }
+          else {
+            console.log('Successfully retrieved users by each row.');
+            
+            // user
+            var user = new User({ id: nmDakota.generateUUID(), name: 'dakota user', loc: 'San Francisco', email: 'dakota@dakota.dakota' });
+            user.save(function(err) {
+              if (err) {
+                console.log('Error creating user: ' + err + '.');
+              }
+              else {
+                user.email = 'dakota@alexanderwong.me';
+                user.name = 'Dakota Wong';
+                user.save(function(err) {
+                  if (err) {
+                    console.log('Error updating user: ' + err + '.');
+                  }
+                  else {
+                    user.delete(function(err) {
+                      if (err) {
+                        console.log('Error deleting user: ' + err + '.');
+                      }
+                      else {
+                        console.log('Successfully deleted user.');
+                      }
+                    });
+                  }
+                });
+              }
+            });
+            
+          }
         }
-        else {
-          user.delete(function(err) {
-            if (err) {
-              console.log('Error deleting user: ' + err + '.');
-            }
-            else {
-              console.log('Successfully deleted user.');
-            }
-          });
-        }
-      });
+      );
     }
   });
   
