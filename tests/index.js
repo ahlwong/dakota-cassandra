@@ -201,6 +201,24 @@ var dakota = new nmDakota(options);
   
   var User = require('./models/user')(dakota);
   
+  User.findOne({ id: nmDakota.generateUUID(), name: 'asdf' }, function(err, user) {
+    if (err) {
+      console.log('Error finding one: ' + err + '.');
+    }
+    else {
+      console.log('Successfully called findOne');
+      
+      User.find({ id: nmDakota.generateUUID(), name: 'asdf' }, function(err, users) {
+        if (err) {
+          console.log('Error finding: ' + err + '.');
+        }
+        else {
+          console.log('Successfully called find');
+        }
+      });
+    }
+  });
+  
   for (var i = 0; i < 5; i++) {
     (function(i) {
       var user = new User({ id: nmDakota.generateUUID(), name: 'test name', loc: 'San Francisco', email: 'test@test.test' });
