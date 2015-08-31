@@ -220,24 +220,24 @@ var validationsDefinition = {
   
   // timestamps
   ctime: {
-    validator: nmDakota.Recipes.Validators.required
+    validator: Dakota.Recipes.Validators.required
   },
   utime: {
-    validator: nmDakota.Recipes.Validators.required
+    validator: Dakota.Recipes.Validators.required
   },
   
   // data
   id: {
-    validator: nmDakota.Recipes.Validators.required
+    validator: Dakota.Recipes.Validators.required
   },
   email: {
     displayName: 'Email',
-    validator: nmDakota.Recipes.Validators.email,
-    sanitizer: nmDakota.Recipes.Sanitizers.email
+    validator: Dakota.Recipes.Validators.email,
+    sanitizer: Dakota.Recipes.Sanitizers.email
   },
   name: {
     displayName: 'Name',
-    validator: [nmDakota.Recipes.Validators.required, nmDakota.Recipes.Validators.minLength(1)]
+    validator: [Dakota.Recipes.Validators.required, Dakota.Recipes.Validators.minLength(1)]
   }
 };
 var validations = new Dakota.Validations(schema, validationsDefinition, {});
