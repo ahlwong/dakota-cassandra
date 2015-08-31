@@ -248,7 +248,7 @@ var User = dakota.addModel('User', schema, validations, {});
 var user = new User();
 user.email = 'dAkOtA@gmail.com'; // automatically sanitizes input
 user.email; // returns 'dakota@gmail.com'
-user.validate(); // returns [errorMessage{String}, ...] if validation errors
+user.validate(); // returns { column: [errorMessage{String}, ...], ... } if validation errors
 user.save(function(err) { // throws Dakota.Model.ValidationFailedError if validation errors
   
 });

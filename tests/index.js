@@ -285,6 +285,16 @@ var dakota = new nmDakota(options);
                       }
                       else {
                         console.log('Successfully deleted user.');
+                        
+                        // delete all
+                        User.deleteAll(function(err) {
+                          if (err) {
+                            console.log('Error deleting all users: ' + err + '.');
+                          }
+                          else {
+                            console.log('Successfully deleted all users.');
+                          }
+                        });
                       }
                     });
                   }
