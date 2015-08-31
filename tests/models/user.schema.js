@@ -14,7 +14,7 @@ var schemaDefinition = {
     utime: 'timestamp',
     
     // data
-    id: 'uuid' ,
+    id: 'uuid',
     bio: 'text',
     email: 'text',
     loc: 'text',
