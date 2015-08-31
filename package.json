@@ -1,0 +1,38 @@
+{
+  "name": "dakota-cassandra",
+  "version": "0.0.1",
+  "description": "Cassandra ORM for NodeJS",
+  "main": "index.js",
+  "dependencies": {
+    "cassandra-driver": "^2.0.0",
+    "underscore": "^1.8.3",
+    "underscore.inflections": "^0.2.1",
+    "underscore.string": "^3.2.0",
+    "validator": "^4.0.5",
+    "when": "^3.7.3"
+  },
+  "author": {
+    "name": "Alexander Wong"
+  },
+  "keywords": [
+    "cassandra",
+    "cql",
+    "cql3",
+    "connection",
+    "pool",
+    "datastax",
+    "nosql",
+    "driver",
+    "database",
+    "orm",
+    "odm",
+    "nodejs",
+    "ahlwong"
+  ],
+  "licenses": [
+    {
+      "type": "Apache License, Version 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ]
+}
