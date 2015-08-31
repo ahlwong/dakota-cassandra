@@ -5,6 +5,7 @@ var nmKeyspace = require('../lib/keyspace');
 var nmSchema = require('../lib/schema');
 var nmTable = require('../lib/table');
 var nmWhen = require('when');
+var nm_ = require('underscore');
 
 // ================
 // = Tests to Run =
@@ -12,7 +13,8 @@ var nmWhen = require('when');
 var RUN_TESTS = {
   keyspaces: true,
   tables: false,
-  queries: true
+  models: false,
+  queries: false
 };
 
 // ===========
@@ -179,7 +181,137 @@ var dakota = new nmDakota(options);
   
 })(RUN_TESTS.tables);
 
+// ==========
+// = Models =
+// ==========
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var User = require('./models/user')(dakota);
+  
+  for (var i = 0; i < 5; i++) {
+    (function(i) {
+      var user = new User({ id: nmDakota.generateUUID(), name: 'test name', loc: 'San Francisco', email: 'test@test.test' });
+      user.save(function(err) {
+        if (err) {
+          console.log('Error creating user: ' + err + '.');
+        }
+        else {
+          console.log('Created user ' + i + ' successfully.');
+        }
+      });
+    })(i);
+  }
+  
+  // count
+  User.count(function(err, count){
+    if (err) {
+      console.log('Error counting users.');
+    }
+    else {
+      console.log('Successfully counted users: ' + count);
+    }
+  });
+  
+  User.first(function(err, result) {
+    if (err) {
+      console.log('Error retrieving first user.');
+    }
+    else {
+      if (result && !(result instanceof User)) {
+        console.log('Error result object not instance of User.');
+      }
+      console.log('Successfully retrieved first user.');
+    }
+  });
+  
+  User.all(function(err, result) {
+    if (err) {
+      console.log('Error retrieving all users.');
+    }
+    else {
+      nm_.each(result, function(u, index) {
+        if (!(u instanceof User)) {
+          console.log('Error result object not instance of User.');
+        }
+      });
+      console.log('Successfully retrieved all users: ' + result.length);
+    }
+  });
+  
+  User.where(email, 'test@test.test').allowFiltering(true).eachRow(
+    function(n, row) {
+      if (!(row instanceof User)) {
+        console.log('Error result object not instance of User.');
+      }
+      console.log('Retrieved row: ' + n);
+    },
+    function(err) {
+      if (err) {
+        console.log('Error retrieving all users by each row: ' + err + '.');
+      }
+      else {
+        console.log('Successfully retrieved users by each row.');
+      }
+    }
+  );
+  
+  var user = new User({ id: nmDakota.generateUUID(), name: 'dakota user', loc: 'San Francisco', email: 'dakota@dakota.dakota' });
+  user.save(function(err) {
+    if (err) {
+      console.log('Error creating user: ' + err + '.');
+    }
+    else {
+      user.email = 'dakota@alexanderwong.me';
+      user.name = 'Dakota Wong';
+      user.save(function(err) {
+        if (err) {
+          console.log('Error updating user: ' + err + '.');
+        }
+        else {
+          user.delete(function(err) {
+            if (err) {
+              console.log('Error deleting user: ' + err + '.');
+            }
+            else {
+              console.log('Successfully deleted user.');
+            }
+          });
+        }
+      });
+    }
+  });
+  
+})(RUN_TESTS.models);
+
 // ===========
 // = Queries =
 // ===========
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  // SELECT
+  var query = new nmQuery(User);
+  query = query.action('select').select('email', 'lucky_numbers').select(['ctime', 'utime']).where('true', 'false').where({ ilove: 'dakota', age: { '$gte' : 5 } }).orderBy('age', '$asc').orderBy({ 'age' : '$desc' }).limit(99).allowFiltering(true);
+  results.push(query.build());
 
+  // UPDATE
+  query = new nmQuery(User);
+  query = query.action('update').using('$ttl', 44300).using({'$timestamp':1337}).update('string', 'some string').update({'int': 1337}).update({ilove:{'$set' : 'dakota'}}).update({lucky_numbers:{'$prepend':'a', '$append' : 'b'}}).update({projects:{'$add':'element'}}).where({home:'is where the heart is'}).if({age:{'$gte':5}}).ifExists(true);
+  results.push(query.build());
+
+  // INSERT
+  query = new nmQuery(User);
+  query = query.action('insert').insert('email', 'fname').insert({'map':{asd:'1231'}, 'list':[1,2,3]}).ifNotExists(true).using('$ttl', 4430);
+  results.push(query.build());
+
+  // DELETE
+  query = new nmQuery(User);
+  query = query.action('delete').select('email', 'fname', 'lname').select(['ctime', 'utime']).where('true', 'false').where({ ilove: 'dakota', age: { '$gte' : 5 } }).using('$timestamp', 555);
+  results.push(query.build());
+  
+})(RUN_TESTS.queries);
