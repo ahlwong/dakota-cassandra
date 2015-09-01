@@ -1,7 +1,7 @@
 // node modules
 var nmDakota = require('../../index');
 
-var exports = {
+module.exports = {
   
   // timestamps
   ctime: {
@@ -26,5 +26,3 @@ var exports = {
   }
   
 }
-
-module.exports = exports;

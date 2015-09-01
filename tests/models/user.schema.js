@@ -1,5 +1,6 @@
 // node modules
 var nmDakota = require('../../index');
+var nmLogger = require('../../lib/logger');
 
 // ==========
 // = Schema =
@@ -53,39 +54,39 @@ var schemaDefinition = {
     
     // new
     afterNew: [
-      function(){ console.log('afterNew callback'); },
+      function(){ nmLogger.debug('afterNew callback'); },
       nmDakota.Recipes.Callbacks.setUuid('id'),
       nmDakota.Recipes.Callbacks.setTimestampToNow('ctime')
     ],
     
     // create
     beforeCreate: [
-      function(){ console.log('beforeCreate callback'); }
+      function(){ nmLogger.debug('beforeCreate callback'); }
     ],
     afterCreate: [
-      function(){ console.log('afterCreate callback'); }
+      function(){ nmLogger.debug('afterCreate callback'); }
     ],
     
     // validate
     beforeValidate: [
-      function(){ console.log('beforeValidate callback'); },
+      function(){ nmLogger.debug('beforeValidate callback'); },
       nmDakota.Recipes.Callbacks.setTimestampToNow('utime')
     ],
     afterValidate: [
-      function(){ console.log('afterValidate callback'); }
+      function(){ nmLogger.debug('afterValidate callback'); }
     ],
     
     // save
     beforeSave: [
-      function(){ console.log('beforeSave callback'); }
+      function(){ nmLogger.debug('beforeSave callback'); }
     ],
     afterSave: [
-      function(){ console.log('afterSave callback'); }
+      function(){ nmLogger.debug('afterSave callback'); }
     ],
     
     // delete
     beforeDelete: [
-      function(){ console.log('beforeDelete callback'); }
+      function(){ nmLogger.debug('beforeDelete callback'); }
     ]
   }
 };

@@ -2,6 +2,7 @@
 var nmCassandra = require('cassandra-driver');
 var nmDakota = require('../index');
 var nmKeyspace = require('../lib/keyspace');
+var nmLogger = require('../lib/logger');
 var nmSchema = require('../lib/schema');
 var nmTable = require('../lib/table');
 var nmWhen = require('when');
@@ -35,6 +36,11 @@ var options = {
   keyspace: {
     replication: { 'class': 'SimpleStrategy', 'replication_factor': 1 },
     durableWrites: true
+  },
+  
+  // logging
+  logging: {
+    level: 'info'
   }
   
 };
@@ -65,26 +71,26 @@ var dakota = new nmDakota(options);
   // create if doesn't exist
   keyspace.create(function(err) {
     if (err) {
-      console.log('Error creating keyspace: ' + err + '.');
+      nmLogger.error('Error creating keyspace: ' + err + '.');
     }
     else {
-      console.log('Created keyspace successfully.');
+      nmLogger.info('Created keyspace successfully.');
       
       // alter keyspace's replication strategy and durable writes
       keyspace.alter({ 'class' : 'SimpleStrategy', 'replication_factor' : 3 }, false, function(err) {
         if (err) {
-          console.log('Error altering keyspace: ' + err + '.');
+          nmLogger.error('Error altering keyspace: ' + err + '.');
         }
         else {
-          console.log('Altered keyspace successfully.');
+          nmLogger.info('Altered keyspace successfully.');
           
           // drop keyspace if exists
           keyspace.drop(function(err) {
             if (err) {
-              console.log('Error dropping keyspace: ' + err + '.');
+              nmLogger.error('Error dropping keyspace: ' + err + '.');
             }
             else {
-              console.log('Dropped keyspace successfully.');
+              nmLogger.info('Dropped keyspace successfully.');
               
               client.shutdown();
             }
@@ -112,66 +118,66 @@ var dakota = new nmDakota(options);
   // drop table
   table.drop(function(err, result) {
     if (err) {
-      console.log('Error dropping table: ' + err + '.');
+      nmLogger.error('Error dropping table: ' + err + '.');
     }
     else {
-      console.log('Dropped table successfully.');
+      nmLogger.info('Dropped table successfully.');
       
       // create table if not exists
       table.create(function(err) {
         if (err) {
-          console.log('Error creating table: ' + err + '.');
+          nmLogger.error('Error creating table: ' + err + '.');
         }
         else {
-          console.log('Created table successfully.');
+          nmLogger.info('Created table successfully.');
           
           // retrieve table schema from system table
           table.selectSchema(function(err) {
             if (err) {
-              console.log('Error getting table schema: ' + err + '.');
+              nmLogger.error('Error getting table schema: ' + err + '.');
             }
             else {
-              console.log('Retrieved table schema successfully.');
+              nmLogger.info('Retrieved table schema successfully.');
               
               // alter table
               table.addColumn('new_column', 'map<text,text>', function(err) {
                 if (err) {
-                  console.log('Error adding column: ' + err + '.');
+                  nmLogger.error('Error adding column: ' + err + '.');
                 }
                 else {
-                  console.log('Added column successfully.');
+                  nmLogger.info('Added column successfully.');
                   
                   // alter table
                   table.renameColumn('id', 'id_new', function(err) {
                     if (err) {
-                      console.log('Error renaming column: ' + err + '.');
+                      nmLogger.error('Error renaming column: ' + err + '.');
                     }
                     else {
-                      console.log('Renamed column successfully.');
+                      nmLogger.info('Renamed column successfully.');
                       
                       // alter table
                       table.alterType('new_column', 'map<blob,blob>', function(err) {
                         if (err) {
-                          console.log('Error changing type of column: ' + err + '.');
+                          nmLogger.error('Error changing type of column: ' + err + '.');
                         }
                         else {
-                          console.log('Changed type of column successfully.');
+                          nmLogger.info('Changed type of column successfully.');
                           
                           // alter table
                           table.dropColumn('new_column', function(err) {
                             if (err) {
-                              console.log('Error dropping column: ' + err + '.');
+                              nmLogger.error('Error dropping column: ' + err + '.');
                             }
                             else {
-                              console.log('Dropped column successfully.');
+                              nmLogger.info('Dropped column successfully.');
                               
                               // drop table
                               table.drop(function(err, result) {
                                 if (err) {
-                                  console.log('Error dropping table: ' + err + '.');
+                                  nmLogger.error('Error dropping table: ' + err + '.');
                                 }
                                 else {
-                                  console.log('Dropped table successfully.');
+                                  nmLogger.info('Dropped table successfully.');
                                 }
                               });
                             }
@@ -203,17 +209,17 @@ var dakota = new nmDakota(options);
   
   User.findOne({ id: nmDakota.generateUUID(), name: 'asdf' }, function(err, user) {
     if (err) {
-      console.log('Error finding one: ' + err + '.');
+      nmLogger.error('Error finding one: ' + err + '.');
     }
     else {
-      console.log('Successfully called findOne');
+      nmLogger.info('Successfully called findOne');
       
       User.find({ id: nmDakota.generateUUID(), name: 'asdf' }, function(err, users) {
         if (err) {
-          console.log('Error finding: ' + err + '.');
+          nmLogger.error('Error finding: ' + err + '.');
         }
         else {
-          console.log('Successfully called find');
+          nmLogger.info('Successfully called find');
         }
       });
     }
@@ -224,107 +230,110 @@ var dakota = new nmDakota(options);
       var user = new User({ id: nmDakota.generateUUID(), name: 'test name', loc: 'San Francisco', email: 'test@test.test' });
       user.save(function(err) {
         if (err) {
-          console.log('Error creating user: ' + err + '.');
+          nmLogger.error('Error creating user: ' + err + '.');
         }
         else {
-          console.log('Created user ' + i + ' successfully.');
+          nmLogger.info('Created user ' + i + ' successfully.');
+          
+          if (i == 5) {
+            
+            // count
+            User.count(function(err, count){
+              if (err) {
+                nmLogger.error('Error counting users.');
+              }
+              else {
+                nmLogger.info('Successfully counted users: ' + count);
+              }
+            });
+            
+            User.all(function(err, result) {
+              if (err) {
+                nmLogger.error('Error retrieving all users.');
+              }
+              else {
+                nm_.each(result, function(u, index) {
+                  if (!(u instanceof User)) {
+                    nmLogger.error('Error result object not instance of User.');
+                  }
+                });
+                nmLogger.info('Successfully retrieved all users: ' + result.length);
+              }
+            });
+            
+            // first
+            User.first(function(err, result) {
+              if (err) {
+                nmLogger.error('Error retrieving first user.');
+              }
+              else {
+                if (result && !(result instanceof User)) {
+                  nmLogger.error('Error result object not instance of User.');
+                }
+                nmLogger.info('Successfully retrieved first user.');
+                
+                // each row
+                User.where({ id: result.id, name: result.name }).allowFiltering(true).eachRow(
+                  function(n, row) {
+                    if (!(row instanceof User)) {
+                      nmLogger.error('Error result object not instance of User.');
+                    }
+                    nmLogger.info('Retrieved row: ' + n);
+                  },
+                  function(err) {
+                    if (err) {
+                      nmLogger.error('Error retrieving all users by each row: ' + err + '.');
+                    }
+                    else {
+                      nmLogger.info('Successfully retrieved users by each row.');
+                      
+                      // user
+                      var user = new User({ id: nmDakota.generateUUID(), name: 'dakota user', loc: 'San Francisco', email: 'dakota@dakota.dakota' });
+                      user.save(function(err) {
+                        if (err) {
+                          nmLogger.error('Error creating user: ' + err + '.');
+                        }
+                        else {
+                          user.email = 'dakota@alexanderwong.me';
+                          user.age = 17;
+                          user.save(function(err) {
+                            if (err) {
+                              nmLogger.error('Error updating user: ' + err + '.');
+                            }
+                            else {
+                              user.delete(function(err) {
+                                if (err) {
+                                  nmLogger.error('Error deleting user: ' + err + '.');
+                                }
+                                else {
+                                  nmLogger.info('Successfully deleted user.');
+                                  
+                                  // delete all
+                                  User.deleteAll(function(err) {
+                                    if (err) {
+                                      nmLogger.error('Error deleting all users: ' + err + '.');
+                                    }
+                                    else {
+                                      nmLogger.info('Successfully deleted all users.');
+                                    }
+                                  });
+                                }
+                              });
+                            }
+                          });
+                        }
+                      });
+                      
+                    }
+                  }
+                );
+              }
+            });
+          }
         }
       });
     })(i);
   }
-  
-  // count
-  User.count(function(err, count){
-    if (err) {
-      console.log('Error counting users.');
-    }
-    else {
-      console.log('Successfully counted users: ' + count);
-    }
-  });
-  
-  User.all(function(err, result) {
-    if (err) {
-      console.log('Error retrieving all users.');
-    }
-    else {
-      nm_.each(result, function(u, index) {
-        if (!(u instanceof User)) {
-          console.log('Error result object not instance of User.');
-        }
-      });
-      console.log('Successfully retrieved all users: ' + result.length);
-    }
-  });
-  
-  // first
-  User.first(function(err, result) {
-    if (err) {
-      console.log('Error retrieving first user.');
-    }
-    else {
-      if (result && !(result instanceof User)) {
-        console.log('Error result object not instance of User.');
-      }
-      console.log('Successfully retrieved first user.');
-      
-      // each row
-      User.where({ id: result.id, name: result.name }).allowFiltering(true).eachRow(
-        function(n, row) {
-          if (!(row instanceof User)) {
-            console.log('Error result object not instance of User.');
-          }
-          console.log('Retrieved row: ' + n);
-        },
-        function(err) {
-          if (err) {
-            console.log('Error retrieving all users by each row: ' + err + '.');
-          }
-          else {
-            console.log('Successfully retrieved users by each row.');
-            
-            // user
-            var user = new User({ id: nmDakota.generateUUID(), name: 'dakota user', loc: 'San Francisco', email: 'dakota@dakota.dakota' });
-            user.save(function(err) {
-              if (err) {
-                console.log('Error creating user: ' + err + '.');
-              }
-              else {
-                user.email = 'dakota@alexanderwong.me';
-                user.name = 'Dakota Wong';
-                user.save(function(err) {
-                  if (err) {
-                    console.log('Error updating user: ' + err + '.');
-                  }
-                  else {
-                    user.delete(function(err) {
-                      if (err) {
-                        console.log('Error deleting user: ' + err + '.');
-                      }
-                      else {
-                        console.log('Successfully deleted user.');
-                        
-                        // delete all
-                        User.deleteAll(function(err) {
-                          if (err) {
-                            console.log('Error deleting all users: ' + err + '.');
-                          }
-                          else {
-                            console.log('Successfully deleted all users.');
-                          }
-                        });
-                      }
-                    });
-                  }
-                });
-              }
-            });
-            
-          }
-        }
-      );
-    }
-  });
   
 })(RUN_TESTS.models);
 
