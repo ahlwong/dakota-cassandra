@@ -5,7 +5,7 @@ var nmLogger = require('../../lib/logger');
 // ==========
 // = Schema =
 // ==========
-var schemaDefinition = {
+module.exports = {
   
   // columns
   columns: {
@@ -89,6 +89,5 @@ var schemaDefinition = {
       function(){ nmLogger.debug('beforeDelete callback'); }
     ]
   }
+  
 };
-
-module.exports = schemaDefinition;

@@ -25,4 +25,4 @@ module.exports = {
     validator: [nmDakota.Recipes.Validators.required, nmDakota.Recipes.Validators.minLength(1)]
   }
   
-}
+};
