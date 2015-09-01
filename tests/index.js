@@ -5,6 +5,7 @@ var nmKeyspace = require('../lib/keyspace');
 var nmLogger = require('../lib/logger');
 var nmSchema = require('../lib/schema');
 var nmTable = require('../lib/table');
+var nmUserDefinedType = require('../lib/user_defined_type');
 var nmWhen = require('when');
 var nm_ = require('underscore');
 
@@ -14,8 +15,9 @@ var nm_ = require('underscore');
 var RUN_TESTS = {
   keyspaces: false,
   tables: false,
-  models: true,
-  queries: false
+  models: false,
+  queries: false,
+  userDefinedTypes: true
 };
 
 // ===========
@@ -366,3 +368,75 @@ var dakota = new nmDakota(options);
   results.push(query.build());
   
 })(RUN_TESTS.queries);
+
+// ======================
+// = User Defined Types =
+// ======================
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var address = new nmUserDefinedType(dakota, 'address', require('./user_defined_types/address'), {});
+  
+  // delete
+  address.drop(function(err, result) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      nmLogger.info('Successfully deleted type.');
+      
+      // create
+      address.create(function(err, result) {
+        if (err) {
+          nmLogger.error(err);
+        }
+        else {
+          nmLogger.info('Successfully created type.');
+          
+          // add field
+          address.addField('new_field', 'set<int>', function(err, result) {
+            if (err) {
+              nmLogger.error(err);
+            }
+            else {
+              nmLogger.info('Successfully added field to type.');
+              
+              // rename
+              address.renameField('new_field', 'old_field', function(err, result) {
+                if (err) {
+                  nmLogger.error(err);
+                }
+                else {
+                  nmLogger.info('Successfully renamed field in type.');
+                  
+                  // select schema
+                  address.selectSchema(function(err, result) {
+                    if (err) {
+                      nmLogger.error(err);
+                    }
+                    else {
+                      nmLogger.info('Successfully selected schema for type.');
+                      
+                      // delete
+                      address.drop(function(err, result) {
+                        if (err) {
+                          nmLogger.error(err);
+                        }
+                        else {
+                          nmLogger.info('Successfully deleted type.');
+                        }
+                      });
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      }, { ifNotExists: true });
+    }
+  }, { ifExists: true });
+  
+})(RUN_TESTS.userDefinedTypes);
