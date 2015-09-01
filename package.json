@@ -34,5 +34,10 @@
       "type": "Apache License, Version 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     }
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahlwong/dakota-cassandra.git"
+  },
+  "homepage": "https://github.com/ahlwong/dakota-cassandra"
 }

@@ -7,6 +7,9 @@ A full feature Apache Cassandra ORM built on top of datastax/nodejs-driver
 $ npm install dakota-cassandra
 ```
 
+## Stability
+Dakota was written over a weekend (8/28/2015 - 8/31/2015) by Alexander Wong out of Boost VC in San Mateo, CA, USA to address the lack of a full featured NodeJS compatible Cassandra ORM. It is currently still a work in progress and will be refined in the coming weeks. Please note that this is still a very young library and may have some growing pains to come. Please check back often.
+
 ## Features
   - Written on top of datastax/nodejs-driver (official Cassandra JavaScript driver)
   - Based off of Mongoid and Mongoose design and usability patterns
