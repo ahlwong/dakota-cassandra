@@ -2,9 +2,6 @@
 var nmDakota = require('../../index');
 var nmLogger = require('../../lib/logger');
 
-// ==========
-// = Schema =
-// ==========
 module.exports = {
   
   // columns
