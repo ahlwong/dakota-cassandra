@@ -249,8 +249,13 @@ var user = new User();
 user.email = 'dAkOtA@gmail.com'; // automatically sanitizes input
 user.email; // returns 'dakota@gmail.com'
 user.validate(); // returns { column: [errorMessage{String}, ...], ... } if validation errors
-user.save(function(err) { // throws Dakota.Model.ValidationFailedError if validation errors
-  
+user.save(function(err) {
+  if (err) {
+    if (err instanceof Dakota.Model.ValidationFailedError) { // Dakota.Model.ValidationFailedError if validation errors
+      var invalidColumns = err.message;
+    }
+  }
+  ...
 });
 ```
 
