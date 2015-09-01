@@ -37,9 +37,9 @@ module.exports = {
     del: 'varint',
     
     // collections
-    projs: { type: { collection: 'set', type: 'timeuuid' } },
-    hash: { type: { collection: 'map', type: ['text', 'inet'] } },
-    thngs: { type: { collection: 'list', type: 'text' } }
+    projs: { type: 'set<timeuuid>' },
+    hash: { type: 'map<text,inet>' },
+    thngs: { type: 'list<text>' }
   
   },
   
