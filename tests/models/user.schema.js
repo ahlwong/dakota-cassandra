@@ -24,6 +24,9 @@ module.exports = {
       get: function(value) { return value.toUpperCase() }
     },
     
+    address: 'address',
+    addresses: 'list<frozen address>',
+    
     // types
     desc: 'ascii',
     cnt: 'bigint',

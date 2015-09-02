@@ -13,11 +13,11 @@ var nm_ = require('underscore');
 // = Tests to Run =
 // ================
 var RUN_TESTS = {
-  keyspaces: false,
+  keyspaces: true,
   tables: false,
   models: true,
   queries: false,
-  userDefinedTypes: false
+  userDefinedTypes: true
 };
 
 // ===========
@@ -72,7 +72,7 @@ var dakota = new nmDakota(options, userDefinedTypes);
   var client = new nmCassandra.Client(connection);
   
   // create keyspace object
-  var keyspace = new nmKeyspace(dakota, client, 'dakota_test_keyspace', replication, durableWrite);
+  var keyspace = new nmKeyspace(client, 'dakota_test_keyspace', replication, durableWrite);
   
   // create if doesn't exist
   keyspace.create(function(err) {
@@ -118,7 +118,7 @@ var dakota = new nmDakota(options, userDefinedTypes);
   
   // get table instance from User model
   var schemaDefinition = require('./models/user.schema');
-  var schema = new nmDakota.Schema(schemaDefinition, {});
+  var schema = new nmDakota.Schema(dakota, schemaDefinition, {});
   var table = new nmTable(dakota, 'user_tests', schema, {});
   
   // drop table
