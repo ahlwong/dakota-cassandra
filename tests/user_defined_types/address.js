@@ -3,6 +3,6 @@ module.exports = {
   city: 'text',
   state: 'text',
   zip: 'int',
-  phones: 'set<text>',
-  tenants: 'map<int,text>'
+  phones: 'frozen <set<text>>',
+  tenants: 'frozen <map<int,text>>'
 };

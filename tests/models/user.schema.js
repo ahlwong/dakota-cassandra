@@ -24,8 +24,8 @@ module.exports = {
       get: function(value) { return value.toUpperCase() }
     },
     
-    address: 'address',
-    addresses: 'list<frozen address>',
+    address: 'frozen<address>',
+    addresses: 'list<frozen <address>>',
     
     // types
     desc: 'ascii',
@@ -102,7 +102,7 @@ module.exports = {
   },
   
   // static methods
-  static_methods: {
+  staticMethods: {
     greet: function() {
       this.eachRow(function(n, user) {
         user.greet()

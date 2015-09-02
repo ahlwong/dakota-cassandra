@@ -14,7 +14,7 @@ var nm_ = require('underscore');
 // ================
 var RUN_TESTS = {
   keyspaces: true,
-  tables: false,
+  tables: true,
   models: true,
   queries: false,
   userDefinedTypes: true
