@@ -29,7 +29,6 @@ module.exports = {
     cnt: 'bigint',
     bits: 'blob',
     sub: 'boolean',
-    // num: 'counter',
     wht: 'decimal',
     prc: 'double',
     qty: 'float',

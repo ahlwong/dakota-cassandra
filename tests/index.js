@@ -19,7 +19,8 @@ var RUN_TESTS = {
   queries: false,
   userDefinedTypes: false,
   complexTypes: false,
-  getterSetter: true
+  getterSetter: false,
+  counter: true
 };
 
 // ===========
@@ -517,3 +518,25 @@ var dakota = new nmDakota(options, userDefinedTypes);
   });
   
 })(RUN_TESTS.getterSetter);
+
+// ===========
+// = Counter =
+// ===========
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var Counter = require('./models/counter')(dakota);
+  
+  var counter = new Counter({ name: nmDakota.generateUUID(), email: 'dakota@dakota.com' });
+  counter.save(function(err) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      nmLogger.info('Counter created successfully.');
+    }
+  });
+  
+})(RUN_TESTS.counter);
