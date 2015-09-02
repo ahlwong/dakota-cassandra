@@ -29,12 +29,14 @@ Dakota was written over a weekend (8/28/2015 - 8/31/2015) by Alexander Wong out 
 ## Missing But Coming
   - Indexes on tables
   - Stream does not buffer queries until a successful connection
-  - User Defined Types
+  - Counter support
 
 ## Basic Usage Example
 
 ```javascript
 var Dakota = require('dakota-cassandra');
+
+// create connection
 
 var options = {
   connection: {
@@ -50,31 +52,68 @@ var options = {
 }
 var dakota = new Dakota(options);
 
-var schema = new Dakota.Schema(require('./user.schema'));
-var validations = new Dakota.Validations(schema, require('./user.validations'));
+// add model
+
+var schema = {
+  columns: {
+    ctime: 'timestamp',
+    utime: 'timestamp',
+    name: 'text',
+    email: 'text',
+    friends: 'list<text>'
+  },
+  key: ['name'],
+  callbacks: {
+    beforeSave: [
+      Dakota.Recipes.Callbacks.setTimestampToNow('utime')
+    ]
+  }
+};
+var validations = {
+  ctime: {
+    validator: Dakota.Recipes.Validators.required
+  },
+  utime: {
+    validator: Dakota.Recipes.Validators.required
+  },
+  id: {
+    validator: Dakota.Recipes.Validators.required
+  },
+  email: {
+    displayName: 'Email',
+    validator: Dakota.Recipes.Validators.email,
+    sanitizer: Dakota.Recipes.Sanitizers.email
+  },
+  name: {
+    displayName: 'Name',
+    validator: [Dakota.Recipes.Validators.required, Dakota.Recipes.Validators.minLength(1)]
+  }
+};
 var User = dakota.addModel('User', schema, validations);
 
+// create a user
+
 var user = new User({ name: 'Dakota' });
-user.species = 'Canine';
-user.name = 'Dakota Wong';
-user.changes(); // returns { name: { from: 'Dakota', to: 'Dakota Wong' }, species: { from: undefined, to: 'Canine' }}
+user.name = 'Dakota Cassandra';
+user.changes(); // returns { name: { from: 'Dakota', to: 'Dakota Cassandra' } }
 user.save(function(err) {
-  if (err) {
-    console.log('Saving failed.');
-  }
-  else {
-    console.log('Saved successfully.');
-  }
+  ...
 });
 
-User.where({ name: 'Dakota Wong' }).first(function(err, user) {
-  return user;
+// querying
+
+User.all(function(err, users) {
+  
+});
+
+User.where({ name: 'Dakota Cassandra' }).first(function(err, user) {
+  ...
 });
 
 User.forEach(function(n, user) {
-  console.log('Non-buffered row result');
+  ...
 }, function(err) {
-  console.log('Complete');
+  ...
 });
 ```
 
@@ -109,7 +148,7 @@ var options = {
   
 };
 
-var dakota = new nmDakota(options);
+var dakota = new Dakota(options);
 ```
 Instantiate a new Dakota object to create a connection to your database.
   - The `connection` object is passed directly to the `datastax/nodejs-driver` `Client` object.
@@ -119,7 +158,7 @@ Instantiate a new Dakota object to create a connection to your database.
 ## Schema
 
 ```javascript
-var schemaDefinition = {
+var schema = {
   
   // columns
   columns: {
@@ -136,57 +175,99 @@ var schemaDefinition = {
     age: 'int',
     
     // collections
-    fields: { type: { collection: 'set', type: 'uuid' } }
-  
+    fields: 'set<uuid>',
+    map: 'map<text,timeuuid>'
+    
   },
   
   // key
-  key: [['id', 'name'], 'age'],
+  key: ['name', 'age'],
   
   // callbacks
   callbacks: {
     
     // new
     afterNew: [
-      function(){ console.log('afterNew callback'); },
-      
-      Dakota.Recipes.Callbacks.setUuid('id'),
-      Dakota.Recipes.Callbacks.setTimestampToNow('ctime')
+      function() { console.log('after new callback'); }
     ],
     
     // create
     beforeCreate: [
-      function(){ console.log('beforeCreate callback'); }
+      ...
     ],
     afterCreate: [
-      function(){ console.log('afterCreate callback'); }
+      ...
     ],
     
     // validate
     beforeValidate: [
-      function(){ console.log('beforeValidate callback'); },
-      
-      Dakota.Recipes.Callbacks.setTimestampToNow('utime')
+      ...
     ],
     afterValidate: [
-      function(){ console.log('afterValidate callback'); }
+      ...
     ],
     
     // save
     beforeSave: [
-      function(){ console.log('beforeSave callback'); }
+      ...
     ],
     afterSave: [
-      function(){ console.log('afterSave callback'); }
+      ...
     ],
     
     // delete
     beforeDelete: [
-      function(){ console.log('beforeDelete callback'); }
+      ...
     ]
   }
 };
-var schema = new Dakota.Schema(schemaDefinition);
+```
+
+## Callbacks
+
+```javascript
+var schema = {
+  
+  ...
+  
+  // callbacks
+  callbacks: {
+    
+    // new
+    afterNew: [
+      function() { console.log('after new callback'); }
+    ],
+    
+    // create
+    beforeCreate: [
+      ...
+    ],
+    afterCreate: [
+      ...
+    ],
+    
+    // validate
+    beforeValidate: [
+      ...
+    ],
+    afterValidate: [
+      ...
+    ],
+    
+    // save
+    beforeSave: [
+      ...
+    ],
+    afterSave: [
+      ...
+    ],
+    
+    // delete
+    beforeDelete: [
+      ...
+    ]
+  }
+};
 ```
 
 ## Models
@@ -194,7 +275,7 @@ var schema = new Dakota.Schema(schemaDefinition);
 ## Querying
 
 ```javascript
-User.select('email', 'name').select(['ctime', 'utime']).where('species', 'dog').where({ name: 'dakota', age: { '$gte' : 5 } }).orderBy('age', '$asc').orderBy({ 'age' : '$desc' }).limit(99).allowFiltering(true).all(function(err, results) {
+User.select(['email', 'utime']).where({ name: 'Dakota Cassandra', age: { '$gte' : 5 } }).orderBy('age', '$asc').limit(1).allowFiltering(true).all(function(err, results) {
   if (err) {
     console.log('Query failed.');
   }
@@ -219,7 +300,7 @@ user.changes('name'); // returns { from: 'prev name', to: 'Dakota }
 ## Validations
 
 ```javascript
-var validationsDefinition = {
+var validations = {
   
   // timestamps
   ctime: {
@@ -243,10 +324,8 @@ var validationsDefinition = {
     validator: [Dakota.Recipes.Validators.required, Dakota.Recipes.Validators.minLength(1)]
   }
 };
-var validations = new Dakota.Validations(schema, validationsDefinition, {});
 
-var schema = new Dakota.Schema(schemaDefinition);
-var User = dakota.addModel('User', schema, validations, {});
+var User = dakota.addModel('User', schema, validations);
 
 var user = new User();
 user.email = 'dAkOtA@gmail.com'; // automatically sanitizes input
@@ -271,6 +350,9 @@ Dakota supports all collection types: lists, maps, and sets.
 
 ## EachRow and Stream Support
 Dakota supports both `.eachRow` and `.stream` options for processing rows from Cassandra.
+
+## User Defined Types
+Dakota supports user defined types.
 
 ## Examples
 For an in-depth look at using Dakota, take a look inside the `/tests` folder.
