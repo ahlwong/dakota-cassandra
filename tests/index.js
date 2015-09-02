@@ -471,7 +471,7 @@ var dakota = new nmDakota(options, userDefinedTypes);
   user.set({
     address: address,
     tuples: ['my tuple', 77, 'is the best tuple of them all'],
-    // nestedTuple: [['my tuple', 77, 'is the best tuple of them all']]
+    nestedTuple: [['my tuple', 77, 'is the best tuple of them all'],['my tuple', 77, 'is the best tuple of them all']]
   });
   user.save(function(err) {
     if (err) {
