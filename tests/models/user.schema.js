@@ -21,7 +21,7 @@ module.exports = {
     exclamation: {
       type: 'text',
       set: function(value) { return value + '!'; },
-      get: function(value) { return value.toUpperCase() }
+      get: function(value) { return value ? value.toUpperCase() : value; }
     },
     
     // types

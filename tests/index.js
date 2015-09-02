@@ -17,8 +17,9 @@ var RUN_TESTS = {
   tables: false,
   models: false,
   queries: false,
-  userDefinedTypes: true,
-  complexTypes: false
+  userDefinedTypes: false,
+  complexTypes: false,
+  getterSetter: true
 };
 
 // ===========
@@ -493,3 +494,26 @@ var dakota = new nmDakota(options, userDefinedTypes);
   });
   
 })(RUN_TESTS.complexTypes);
+
+// =====================
+// = Getter and Setter =
+// =====================
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var User = require('./models/user')(dakota);
+  
+  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com' }, function(err) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      user.exclamation = 'ahoy';
+      nmLogger.info(user._get('exclamation'));
+      nmLogger.info(user.exclamation);
+    }
+  });
+  
+})(RUN_TESTS.getterSetter);
