@@ -17,8 +17,8 @@ var RUN_TESTS = {
   tables: false,
   models: false,
   queries: false,
-  userDefinedTypes: false,
-  complexTypes: true
+  userDefinedTypes: true,
+  complexTypes: false
 };
 
 // ===========
