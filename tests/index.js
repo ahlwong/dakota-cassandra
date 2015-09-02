@@ -13,11 +13,12 @@ var nm_ = require('underscore');
 // = Tests to Run =
 // ================
 var RUN_TESTS = {
-  keyspaces: true,
-  tables: true,
-  models: true,
+  keyspaces: false,
+  tables: false,
+  models: false,
   queries: false,
-  userDefinedTypes: true
+  userDefinedTypes: false,
+  complexTypes: true
 };
 
 // ===========
@@ -448,3 +449,47 @@ var dakota = new nmDakota(options, userDefinedTypes);
   }, { ifExists: true });
   
 })(RUN_TESTS.userDefinedTypes);
+
+// =================
+// = Complex Types =
+// =================
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var User = require('./models/user')(dakota);
+  var user = new User({ name: 'Frank', email: 'dakota@dakota.dakota' });
+  var address = {
+    street: '123 Main Street',
+    city: 'San Francisco',
+    state: 'California',
+    zip: 92210,
+    phones: ['(123) 456-7890', '(123) 456-7890'],
+    tenants: { 101: 'Bob', 505: 'Mary' }
+  };
+  user.set({
+    address: address,
+    tuples: ['my tuple', 77, 'is the best tuple of them all'],
+    // nestedTuple: [['my tuple', 77, 'is the best tuple of them all']]
+  });
+  user.save(function(err) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      nmLogger.info('Saved user successfully.');
+      
+      // retrieve
+      // User.first(function(err, result) {
+      //   if (err) {
+      //     nmLogger.error(err);
+      //   }
+      //   else {
+      //     nmLogger.info(result);
+      //   }
+      // });
+    }
+  });
+  
+})(RUN_TESTS.complexTypes);

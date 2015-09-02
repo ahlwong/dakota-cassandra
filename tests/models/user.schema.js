@@ -24,9 +24,6 @@ module.exports = {
       get: function(value) { return value.toUpperCase() }
     },
     
-    address: 'frozen<address>',
-    addresses: 'list<frozen <address>>',
-    
     // types
     desc: 'ascii',
     cnt: 'bigint',
@@ -46,10 +43,18 @@ module.exports = {
     del: 'varint',
     
     // collections
-    projs: { type: 'set<timeuuid>' },
-    hash: { type: 'map<text,inet>' },
-    thngs: { type: 'list<text>' }
-  
+    projs: 'set<timeuuid>',
+    hash: 'map<text,inet>',
+    thngs: 'list<text>',
+    
+    // user defined types
+    address: 'frozen <address>',
+    addresses: 'list<frozen <address>>',
+    
+    // tuples
+    tuples: 'tuple<text, int, text>',
+    nestedTuple: 'list<frozen <tuple<text, int, text>>>'
+    
   },
   
   // key
