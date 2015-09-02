@@ -47,7 +47,11 @@ var options = {
   
 };
 
-var dakota = new nmDakota(options);
+var userDefinedTypes = {
+  address: require('./user_defined_types/address')
+};
+
+var dakota = new nmDakota(options, userDefinedTypes);
 
 // =============
 // = Keyspaces =
