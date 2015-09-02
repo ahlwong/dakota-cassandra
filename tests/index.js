@@ -481,14 +481,14 @@ var dakota = new nmDakota(options, userDefinedTypes);
       nmLogger.info('Saved user successfully.');
       
       // retrieve
-      // User.first(function(err, result) {
-      //   if (err) {
-      //     nmLogger.error(err);
-      //   }
-      //   else {
-      //     nmLogger.info(result);
-      //   }
-      // });
+      User.first(function(err, result) {
+        if (err) {
+          nmLogger.error(err);
+        }
+        else {
+          nmLogger.info(result);
+        }
+      });
     }
   });
   
