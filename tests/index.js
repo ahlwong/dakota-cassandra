@@ -241,7 +241,11 @@ var dakota = new nmDakota(options, userDefinedTypes);
         else {
           nmLogger.info('Created user ' + i + ' successfully.');
           
-          if (i == 5) {
+          if (i == 4) {
+            
+            // test method and static methods
+            user.greet();
+            User.greet();
             
             // count
             User.count(function(err, count){

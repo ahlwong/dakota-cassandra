@@ -18,6 +18,12 @@ module.exports = {
     loc: 'text',
     name: 'text',
     
+    exclamation: {
+      type: 'text',
+      set: function(value) { return value + '!'; },
+      get: function(value) { return value.toUpperCase() }
+    },
+    
     // types
     desc: 'ascii',
     cnt: 'bigint',
@@ -85,6 +91,29 @@ module.exports = {
     beforeDelete: [
       function(){ nmLogger.debug('beforeDelete callback'); }
     ]
+  },
+  
+  // methods
+  methods: {
+    greet: function() { console.log('Hello, my name is ' + this.name + '.'); }
+  },
+  
+  // static methods
+  static_methods: {
+    greet: function() {
+      this.eachRow(function(n, user) {
+        user.greet()
+      }, function(err) {
+        if (err) {
+          throw err;
+        }
+      });
+    }
+  },
+  
+  // options
+  options: {
+    
   }
   
 };

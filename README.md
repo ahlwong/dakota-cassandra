@@ -16,7 +16,7 @@ Dakota was written over a weekend (8/28/2015 - 8/31/2015) by Alexander Wong out 
   - Schema backed models
   - Utilizes prepared queries
   - Support for all data types and collection types
-  - Support for forEach and stream to process large queries
+  - Support for eachRow and stream to process large queries
   - All queries are buffered until a successful connection is established
   - Chainable query interface
   - Changed column tracking
@@ -110,7 +110,7 @@ User.where({ name: 'Dakota Cassandra' }).first(function(err, user) {
   ...
 });
 
-User.forEach(function(n, user) {
+User.eachRow(function(n, user) {
   ...
 }, function(err) {
   ...
