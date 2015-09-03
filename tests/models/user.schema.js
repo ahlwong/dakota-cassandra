@@ -116,11 +116,6 @@ module.exports = {
         }
       });
     }
-  },
-  
-  // options
-  options: {
-    
   }
   
 };

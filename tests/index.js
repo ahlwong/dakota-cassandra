@@ -462,7 +462,7 @@ var dakota = new nmDakota(options, userDefinedTypes);
   }
   
   var User = require('./models/user')(dakota);
-  var user = new User({ name: 'Frank', email: 'dakota@dakota.dakota' });
+  var user = new User({ name: 'Frank', email: 'dakota@dakota.dakota', loc: 'San Mateo' });
   var address = {
     street: '123 Main Street',
     city: 'San Francisco',
@@ -536,6 +536,10 @@ var dakota = new nmDakota(options, userDefinedTypes);
   counter.decrement('num', 4);
   nmLogger.info(counter.changes('num'));
   counter.decrement('num', 1);
+  nmLogger.info(counter.changes('num'));
+  counter.incrementNum(99);
+  nmLogger.info(counter.changes('num'));
+  counter.decrementNum(77);
   nmLogger.info(counter.changes('num'));
   counter.save(function(err) {
     if (err) {
