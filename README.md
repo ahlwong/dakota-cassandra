@@ -47,7 +47,7 @@ User.where({ name: 'Alex' }).first(function(err, user) { ... });
     - Define custom setters, getters, instance, and static methods
     - Callback / filter chains on `afterNew`, `beforeCreate`, `afterCreate`, `beforeValidate`, `afterValidate`, `beforeSave`, `afterSave`, `beforeDelete`
     - Define custom sanitizers and validators for fields
-        - 'Recipes' for common and compositable validation and sanitization tasks
+        - 'Recipes' for common and chainable validation and sanitization tasks
         - ... examples include: `minLength`, `maxLength`, `required`, `email`, and more ...
         - User definable validation messages that can be output to user
     - Set column values with pre-generated setters and getters
@@ -163,7 +163,7 @@ var defaultOptions = {
   
 };
 ```
-  - `keyspace.ensureExists` dictactes the keyspace discrepancy rectification policy
+  - `keyspace.ensureExists` dictates the keyspace discrepancy rectification policy
     - `run` - check existence of keyspace, create if missing, and compare schema?
     - `alter` - alter keyspace to match `replication` and `durableWrites` options
   - `logger` determines behavior of built in logger
@@ -183,7 +183,7 @@ var defaultOptions = {
       - `recreateColumn` - drop and recreate column on type mismatch
       - `removeExtra` - drop columns not in schema
       - `addExtra` - add columns that are defined in the schema but don't exist in the table
-  - `userDefinedType.ensureExists` dictactes the UDT discrepancy rectification policy
+  - `userDefinedType.ensureExists` ditactes the UDT discrepancy rectification policy
     - `run` - check existence of UDT, create if missing, and compare schema?
     - `recreate` - drop and recreate UDT on discrepancy
     - `changeType` - attempt to change type on field if type mismatches schema
@@ -279,8 +279,9 @@ var schema = {
  - `schema.columns` defines your model's fields and corresponding types
    - an `Object` can be set per field for additional configuration (see `email` above)
      - `alias` specifies the name to use for auto generated methods and arguments to those methods
-       - because column names are stored in each record in Cassandra, it is sometimes desirable to have a more user friendly name; for instance: `fids: { alias: 'FriendIDs', type: set<uuid> }`
-       - ... will create `.friendIDs`, `.friendIDs =`, `.appendFriendID`, etc methods
+       - because column names are stored in each record in Cassandra, it is sometimes desirable to have a more user friendly name
+       - ... for instance: `fids: { alias: 'FriendIDs', type: set<uuid> }` will create `.friendIDs`, `.friendIDs =`, `.addFriendID`, ... methods
+       - aliases are also support mass assignment, for instance: `new User({ FriendIDs: [...], ... })` and `user.set({ FriendIDs: [...], ... })`
      - `type` specifies the type of the field
      - `set` and `get` will be invoked when setting or getting the column value
        - *NOTICE* they both `return` the value
@@ -302,7 +303,7 @@ user.email = 'dAkOtA@dAKOta.DAkota'; // automatically sanitizes input
 user.email; // returns 'dakota@dakota.dakota'
 
 user.password = 'dak';
-user.validate(); // returns { password: ['Password must contain atleast one character and one number.', 'PAssword must be more than 6 characters long', ... ], ... } if validation errors
+user.validate(); // returns { password: ['Password must contain at least one character and one number.', 'Password must be more than 6 characters long', ... ], ... } if validation errors
 
 user.save(function(err) {
   if (err) {
@@ -373,7 +374,7 @@ User.truncate(function(err) { ... });
 ```
   - Instances of models can be created 3 different ways
     - `new User([assignments])` and `User.new([assignments])` are functionally identical and create an instance without immediately persisting it to the database
-    - `User.create([assignments], callback)` immediately but asychronously persists the object to the database
+    - `User.create([assignments], callback)` immediately but asynchronously persists the object to the database
   - `.delete(callback)` deletes the model instance's corresponding row in the database
   - `.deleteAll(callback)` and `.truncate(callback)` are identical and remove all rows from a table
 

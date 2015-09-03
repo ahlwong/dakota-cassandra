@@ -697,17 +697,18 @@ var dakota = new nmDakota(options, userDefinedTypes);
   }
   
   var User = require('./models/user')(dakota);
-  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco', thngs: ['bird', 'aligator'] }, function(err) {
+  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco', weight: 160.0 }, function(err) {
     if (err) {
       nmLogger.error(err);
     }
     else {
       
+      nmLogger.info(user.weight);
       user.weight = 135.0;
       user.price = 1000000000;
       var uuid = nmDakota.generateUUID();
       user.friendUUIDs = [nmDakota.generateUUID(), uuid, nmDakota.generateUUID()];
-      console.log(user);
+      nmLogger.info(user.changes());
       user.addFriendUUID(nmDakota.generateUUID());
       user.removeFriendUUID(uuid);
       nmLogger.info(user.changes());
