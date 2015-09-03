@@ -21,8 +21,8 @@ var RUN_TESTS = {
   complexTypes: false,
   getterSetter: false,
   counter: false,
-  collections: false,
-  inject: true
+  collections: true,
+  inject: false
 };
 
 // ===========
@@ -572,6 +572,12 @@ var dakota = new nmDakota(options, userDefinedTypes);
       nmLogger.info(user.changes('projs'));
       var timeUUID = nmDakota.generateTimeUUID();
       user.add('projs', timeUUID);
+      nmLogger.info(user.changes('projs'));
+      user.add('projs', timeUUID);
+      user.add('projs', timeUUID);
+      user.add('projs', timeUUID);
+      nmLogger.info(user.changes('projs'));
+      user.set('projs', [timeUUID, timeUUID, timeUUID, timeUUID]);
       nmLogger.info(user.changes('projs'));
       user.remove('projs', timeUUID);
       nmLogger.info(user.changes('projs'));

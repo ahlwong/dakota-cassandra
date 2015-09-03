@@ -1,12 +1,19 @@
 # dakota-cassandra
+
 A full feature Apache Cassandra ORM built on top of datastax/nodejs-driver
+
 ## Installation
+
 ```bash
 $ npm install dakota-cassandra
 ```
+
 ## Stability
+
 Dakota was written over a weekend (8/28/2015 - 8/31/2015) by Alexander Wong out of Boost VC in San Mateo, CA, USA to address the lack of a full featured NodeJS compatible Cassandra ORM. It is currently still a work in progress and will be refined in the coming weeks. Please check back often for updates and bug fixes.
+
 ## Basic Usage Example
+
 ```javascript
 var Dakota = require('dakota-cassandra');
 var dakota = new Dakota(options);
@@ -15,7 +22,9 @@ var user = new User({ name: 'Alex' });
 user.save(function(err) { ... });
 User.where({ name: 'Alex' }).first(function(err, user) { ... });
 ```
+
 ## Features
+
   - Solid foundation
     - Written on top of datastax/nodejs-driver (official Cassandra JavaScript driver)
     - Based off of Mongoid and Mongoose design and usability patterns
@@ -52,11 +61,16 @@ User.where({ name: 'Alex' }).first(function(err, user) { ... });
         - Keyspaces have options for `ensure exists`, and `alter` (to alter `replication` and `durableWrites`)
         - Tables have options for `ensure exists`, `recreate`, `recreateColumn`, `removeExtra`, `addMissing`
         - User defined types have options for `ensure exists`, `recreate`, `changeType`, `addMissing`
+
 ## Missing But Coming
+
   - Indexes on tables
   - Stream does not buffer queries until a successful connection
+
 ## Connection and Options
+
 #### Minimal Options
+
 ```javascript
 var options = {
   connection: {
@@ -75,7 +89,9 @@ var dakota = new Dakota(options);
   - `options.connection` is passed directly to the datastax/nodejs-driver `Client` object; you can specify additional fields here as necessary
   - `options.keyspace` is used to configure your app's keyspace
     - If a keyspace with the name in `options.connection.keyspace` doesn't exist, it is automatically created. If it does exist, its schema is compared against the options here (see below for automatic discrepancy resolution).
+
 #### Full Options (Library Defaults)
+
 ```javascript
 var nm_ = require('underscore');
 var nm_i = require('underscore.inflections');
@@ -172,7 +188,9 @@ var defaultOptions = {
     - `recreate` - drop and recreate UDT on discrepancy
     - `changeType` - attempt to change type on field if type mismatches schema
     - `addMissing` - add fields that are defined in the schema but don't exist in UDT
+
 ## Models
+
 ```javascript
 var User = dakota.addModel('User', require('./user.schema'), require('./user.validations'), options);
 ```
@@ -272,8 +290,11 @@ var schema = {
     - `Recipes` for common callbacks are provided in the `/lib/recipes` directory and are loaded under `Dakota.Rescipes.Callbacks`
   - `schema.methods` defines instance methods available on each model instance
   - `schema.staticMethods` defines static methods on the model
+
 ## Validations
+
 ### Usage
+
 ```javascript
 var user = new User();
 
@@ -298,7 +319,9 @@ user.save(function(err) {
    - if validation errors exist, an `Object` will be produced where the keys correspond to column names and the values are arrays of validation error messages
    - `.validate()` returns a validation `Object` immediately on validation fail, and `false` on validation pass
    - `.save()` is interrupted on validation errors and a `Dakota.Model.ValidationFailedError` is passed as the `err` argument to the callback
+
 ### Definition
+
 ```javascript
 var Dakota = require('dakota-cassandra');
 var validations = {
@@ -333,7 +356,9 @@ var validations = {
     - `.validator.validator` is a a function that must return true or false based on its input value
     - `.validator.message` returns a custom message based on a passed in `displayName`
   - `.sanitizer` is an array of sanitizer functions or a single sanitization function
+
 ## Creating and Deleting
+
 ```javascript
 var User = dakota.addModel('User', schema, validations);
 var user = new User({ name: 'Dakota' });
@@ -351,7 +376,9 @@ User.truncate(function(err) { ... });
     - `User.create([assignments], callback)` immediately but asychronously persists the object to the database
   - `.delete(callback)` deletes the model instance's corresponding row in the database
   - `.deleteAll(callback)` and `.truncate(callback)` are identical and remove all rows from a table
+
 ## Querying
+
 ```javascript
 User.all(function(err, users) { ... });
 User.where({ name: 'Dakota' }).first(function(err, user) { ... });
@@ -376,7 +403,9 @@ User.stream();
   - `.allowFiltering(allow{Boolean}, options{Object}?)` adds the `ALLOW FILTERING` clause to the compiled `SELECT` query
   - `.find([conditions], callback)` and `.findOne([conditions], callback)` are short hand methods for `.where(...).all(...)` and `.where(...).first(...)`
   - `.eachRow(...)` and `.stream()` methods invoke the corresponding Cassandra non-buffering row processing methods
+
 ## Setters and Getters
+
 ```javascript
 User.first(function(err, user) {
 
@@ -428,7 +457,9 @@ userCounter.cnt; // returns 1
 
 });
 ```
+
 ## Change Tracking
+
 ```javascript
 User.first(function(err, user) {
 
@@ -441,7 +472,9 @@ user.changes('name'); // returns { from: 'prev name', to: 'Dakota }
 
 });
 ```
+
 ## User Defined Types
+
 ```javascript
 var Dakota = require('dakota-cassandra');
 
@@ -462,5 +495,7 @@ var dakota = new Dakota(options, userDefinedTypes);
   - User defined types must be passed into the `new Dakota(options, [userDefinedTypes])` constructor because model schemas may depend on their existence
   - The format of the `userDefinedTypes` argument should be an `Object` where each `key` is the `name` of the user defined type you'd like to define
   - The definition of each user defined type should be an `Object` that maps field names to types
+
 ## Examples
+
 For an in-depth look at using Dakota, take a look inside the `/tests` folder.
