@@ -3,6 +3,7 @@ var nmCassandra = require('cassandra-driver');
 var nmDakota = require('../index');
 var nmKeyspace = require('../lib/keyspace');
 var nmLogger = require('../lib/logger');
+var nmQuery = require('../lib/query');
 var nmSchema = require('../lib/schema');
 var nmTable = require('../lib/table');
 var nmUserDefinedType = require('../lib/user_defined_type');
@@ -23,7 +24,8 @@ var RUN_TESTS = {
   counter: false,
   collections: false,
   inject: false,
-  alias: true
+  alias: false,
+  instanceQueries: true
 };
 
 // ===========
@@ -86,6 +88,10 @@ var userDefinedTypes = {
 };
 
 var dakota = new nmDakota(options, userDefinedTypes);
+
+// models
+var User = require('./models/user')(dakota);
+var Counter = require('./models/counter')(dakota);
 
 // =============
 // = Keyspaces =
@@ -245,8 +251,6 @@ var dakota = new nmDakota(options, userDefinedTypes);
     return;
   }
   
-  var User = require('./models/user')(dakota);
-  
   User.findOne({ id: nmDakota.generateUUID(), name: 'asdf' }, function(err, user) {
     if (err) {
       nmLogger.error('Error finding one: ' + err + '.');
@@ -391,23 +395,23 @@ var dakota = new nmDakota(options, userDefinedTypes);
   
   // SELECT
   var query = new nmQuery(User);
-  query = query.action('select').select('email', 'lucky_numbers').select(['ctime', 'utime']).where('true', 'false').where({ ilove: 'dakota', age: { '$gte' : 5 } }).orderBy('age', '$asc').orderBy({ 'age' : '$desc' }).limit(99).allowFiltering(true);
-  results.push(query.build());
+  query = query.action('select').select('email', 'addresses').select(['ctime', 'utime']).where('name', 'Dakota').where({ loc: 'San Francisco', age: { '$gte' : 5 } }).orderBy('loc', '$asc').orderBy({ 'loc' : '$desc' }).limit(99).allowFiltering(true);
+  nmLogger.info(query.build());
 
   // UPDATE
   query = new nmQuery(User);
-  query = query.action('update').using('$ttl', 44300).using({'$timestamp':1337}).update('string', 'some string').update({'int': 1337}).update({ilove:{'$set' : 'dakota'}}).update({lucky_numbers:{'$prepend':'a', '$append' : 'b'}}).update({projects:{'$add':'element'}}).where({home:'is where the heart is'}).if({age:{'$gte':5}}).ifExists(true);
-  results.push(query.build());
+  query = query.action('update').using('$ttl', 44300).using({'$timestamp':1337}).update('slug', 'some string').update({'age': 1337}).update({desc:{'$set' : 'i love dakota'}}).update({thngs:{'$prepend':'a', '$append' : 'b'}}).update({projs:{'$add':nmDakota.generateUUID()}}).where({name:'Dakota'}).if({age:{'$gte':5}}).ifExists(true);
+  nmLogger.info(query.build());
 
   // INSERT
   query = new nmQuery(User);
-  query = query.action('insert').insert('email', 'fname').insert({'map':{asd:'1231'}, 'list':[1,2,3]}).ifNotExists(true).using('$ttl', 4430);
-  results.push(query.build());
+  query = query.action('insert').insert('email', 'dakota@dakota.dakota').insert({'hash':{asd:'127.0.0.1'}, 'thngs':['1','2','3']}).ifNotExists(true).using('$ttl', 4430);
+  nmLogger.info(query.build());
 
   // DELETE
   query = new nmQuery(User);
-  query = query.action('delete').select('email', 'fname', 'lname').select(['ctime', 'utime']).where('true', 'false').where({ ilove: 'dakota', age: { '$gte' : 5 } }).using('$timestamp', 555);
-  results.push(query.build());
+  query = query.action('delete').select('desc', 'age', 'tid').select(['ctime', 'utime']).where('name', 'Dakota').where({ loc: 'San Francisco', age: { '$gte' : 5 } }).using('$timestamp', 555);
+  nmLogger.info(query.build());
   
 })(RUN_TESTS.queries);
 
@@ -421,65 +425,55 @@ var dakota = new nmDakota(options, userDefinedTypes);
   
   var address = new nmUserDefinedType(dakota, 'address', require('./user_defined_types/address'), {});
   
-  // delete
-  address.drop(function(err, result) {
+  // create
+  address.create(function(err, result) {
     if (err) {
       nmLogger.error(err);
     }
     else {
-      nmLogger.info('Successfully deleted type.');
+      nmLogger.info('Successfully created type.');
       
-      // create
-      address.create(function(err, result) {
+      // add field
+      address.addField('new_field', 'set<int>', function(err, result) {
         if (err) {
           nmLogger.error(err);
         }
         else {
-          nmLogger.info('Successfully created type.');
+          nmLogger.info('Successfully added field to type.');
           
-          // add field
-          address.addField('new_field', 'set<int>', function(err, result) {
+          // rename
+          address.renameField('new_field', 'old_field', function(err, result) {
             if (err) {
               nmLogger.error(err);
             }
             else {
-              nmLogger.info('Successfully added field to type.');
+              nmLogger.info('Successfully renamed field in type.');
               
-              // rename
-              address.renameField('new_field', 'old_field', function(err, result) {
+              // select schema
+              address.selectSchema(function(err, result) {
                 if (err) {
                   nmLogger.error(err);
                 }
                 else {
-                  nmLogger.info('Successfully renamed field in type.');
+                  nmLogger.info('Successfully selected schema for type.');
                   
-                  // select schema
-                  address.selectSchema(function(err, result) {
-                    if (err) {
-                      nmLogger.error(err);
-                    }
-                    else {
-                      nmLogger.info('Successfully selected schema for type.');
-                      
-                      // delete
-                      address.drop(function(err, result) {
-                        if (err) {
-                          nmLogger.error(err);
-                        }
-                        else {
-                          nmLogger.info('Successfully deleted type.');
-                        }
-                      });
-                    }
-                  });
+                  // delete, commented out becuase user schema relies on address
+                  // address.drop(function(err, result) {
+                  //   if (err) {
+                  //     nmLogger.error(err);
+                  //   }
+                  //   else {
+                  //     nmLogger.info('Successfully deleted type.');
+                  //   }
+                  // });
                 }
               });
             }
           });
         }
-      }, { ifNotExists: true });
+      });
     }
-  }, { ifExists: true });
+  }, { ifNotExists: true });
   
 })(RUN_TESTS.userDefinedTypes);
 
@@ -491,7 +485,6 @@ var dakota = new nmDakota(options, userDefinedTypes);
     return;
   }
   
-  var User = require('./models/user')(dakota);
   var user = new User({ name: 'Frank', email: 'dakota@dakota.dakota', loc: 'San Mateo' });
   var address = {
     street: '123 Main Street',
@@ -535,9 +528,7 @@ var dakota = new nmDakota(options, userDefinedTypes);
     return;
   }
   
-  var User = require('./models/user')(dakota);
-  
-  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com' }, function(err) {
+  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Jose' }, function(err) {
     if (err) {
       nmLogger.error(err);
     }
@@ -557,8 +548,6 @@ var dakota = new nmDakota(options, userDefinedTypes);
   if (!run) {
     return;
   }
-  
-  var Counter = require('./models/counter')(dakota);
   
   var counter = new Counter({ name: nmDakota.generateUUID(), email: 'dakota@dakota.com', loc: 'SF' });
   counter.increment('num', 5);
@@ -590,7 +579,6 @@ var dakota = new nmDakota(options, userDefinedTypes);
     return;
   }
   
-  var User = require('./models/user')(dakota);
   var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco' }, function(err) {
     if (err) {
       nmLogger.error(err);
@@ -654,7 +642,6 @@ var dakota = new nmDakota(options, userDefinedTypes);
     return;
   }
   
-  var User = require('./models/user')(dakota);
   var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco', thngs: ['bird', 'aligator'] }, function(err) {
     if (err) {
       nmLogger.error(err);
@@ -696,7 +683,6 @@ var dakota = new nmDakota(options, userDefinedTypes);
     return;
   }
   
-  var User = require('./models/user')(dakota);
   var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco', weight: 160.0 }, function(err) {
     if (err) {
       nmLogger.error(err);
@@ -735,3 +721,56 @@ var dakota = new nmDakota(options, userDefinedTypes);
   });
   
 })(RUN_TESTS.alias);
+
+// ====================
+// = Instance Queries =
+// ====================
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var params = { id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco', weight: 160.0 };
+  var user = User.create(params, function(err) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      user.ifExists(true).save(function(err) {
+        if (err) {
+          nmLogger.error(err);
+        }
+        else {
+          
+          user.ifExists(true).delete(function(err) {
+            if (err) {
+              nmLogger.error(err);
+            }
+          });
+          
+        }
+      });
+    }
+  });
+  
+  user = new User({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco', weight: 160.0 });
+  user.ttl(5).timestamp(1231231232).save(function(err) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      
+    }
+  });
+  
+  user = new User(params);
+  user.ifNotExists(true).ttl(5).save(function(err) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      
+    }
+  });
+  
+})(RUN_TESTS.instanceQueries);

@@ -366,9 +366,16 @@ var user = new User({ name: 'Dakota' });
 user.save(function(err) { ... });
 user = User.new({ name: 'Alex' });
 user.save(function(err) { ... });
-User.create({ name: 'Cindy' }, function(err, user) { ... });
+user = User.create({ name: 'Cindy' }, function(err) { ... });
+
+user.if({ name: 'Dakota' }).save(function(err) { ... });
+user.ifNotExists(true).ttl(1000).save(function(err) { ... });
+user.using({ '$ttl' : 1000, '$timestamp' : 123456789 }).save(function(err) { ... });
+user.timestamp(123456789).save(function(err) { ... });
 
 user.delete(function(err) { ... });
+user.ifExists(true).delete(function(err) { ... });
+
 User.deleteAll(function(err) { ... });
 User.truncate(function(err) { ... });
 ```
@@ -377,6 +384,7 @@ User.truncate(function(err) { ... });
     - `User.create([assignments], callback)` immediately but asynchronously persists the object to the database
   - `.delete(callback)` deletes the model instance's corresponding row in the database
   - `.deleteAll(callback)` and `.truncate(callback)` are identical and remove all rows from a table
+  - `.ttl(...)`, `.timestamp(...)`, `.using(...)`, `.ifExists(...)`, `.ifNotExists(...)`, and `.if()` query chains can modify query parameters before `.delete(...)` or `.save(...)` compile and run the query on the database
 
 ## Querying
 
@@ -395,13 +403,13 @@ User.stream();
 ```
   - There are a multitude of ways to dynamically query your data using the query builder
   - `.all(callback)`, `.first(callback)`, `.execute(callback)`, and `.count(callback)` methods terminate query building, compile your query, and submit it to the database; they should be used at the end of a query chain to execute the query
-  - `.select([column{String}, ...], options{Object}?)` and `.select(column{String}, ..., options{Object}?)` specifies which columns to return in your results
+  - `.select([column{String}, ...])` and `.select(column{String}, ...)` specifies which columns to return in your results
     - `.select` is additive, meaning `.select('name').select('email')` will return both name and email in resulting rows
-  - `.where(column{String}, value, options{Object}?)`, `.where({ column{String}: value }, options{Object}?)`, and `.where({ column{String}: { operation[$eq, $gt, $gte, ...]{String}: value }}, options{Object}?)` specifies the WHERE conditions in your query
+  - `.where(column{String}, value)`, `.where({ column{String}: value })`, and `.where({ column{String}: { operation[$eq, $gt, $gte, ...]{String}: value }})` specifies the WHERE conditions in your query
     - `.where` is additive but overrides conditions on the same column, meaning `.where('name', 'Dakota').where({ age: 5}).where('name', 'Dak')` will compiles to `WHERE "name" = 'Dak' AND "age" = 5`
-  - `.orderBy({ partitionKey{String}: order[$asc, $desc]{String} }, options{Object}?)` and `.orderBy(partitionKey{String}, order[$asc, $desc]{String}, options{Object}?)` order your results by a particular partition key in either `$asc` or `$desc` order
-  - `.limit(limit{Integer}, options{Object}?)` limits the number of rows returned
-  - `.allowFiltering(allow{Boolean}, options{Object}?)` adds the `ALLOW FILTERING` clause to the compiled `SELECT` query
+  - `.orderBy({ partitionKey{String}: order[$asc, $desc]{String} })` and `.orderBy(partitionKey{String}, order[$asc, $desc]{String})` order your results by a particular partition key in either `$asc` or `$desc` order
+  - `.limit(limit{Integer})` limits the number of rows returned
+  - `.allowFiltering(allow{Boolean})` adds the `ALLOW FILTERING` clause to the compiled `SELECT` query
   - `.find([conditions], callback)` and `.findOne([conditions], callback)` are short hand methods for `.where(...).all(...)` and `.where(...).first(...)`
   - `.eachRow(...)` and `.stream()` methods invoke the corresponding Cassandra non-buffering row processing methods
 
