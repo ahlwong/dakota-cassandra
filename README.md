@@ -398,7 +398,7 @@ user.inject(1, 'item 0');
 user.items; // returns ['item 0', 'item 0'];
 user.removeItem('item 0');
 user.items; // returns null
-user.items = ['item 0', 'item 1', 'item 2];
+user.items = ['item 0', 'item 1', 'item 2'];
 user.items; // returns ['item 0', 'item 1', 'item 2]
 
 // assuming schema friends: { type: set<text> }
@@ -412,7 +412,7 @@ user.friends = ['Jenny', 'Alex', 'Cathy', 'Cathy'];
 user.friends; // returns ['Jenny', 'Alex', 'Cathy']
 
 // assuming schema hosts: { type: map<text,inet> }
-user.hosts = { localhost: '127.0.0.1, mask: '255.255.255.255' };
+user.hosts = { localhost: '127.0.0.1', mask: '255.255.255.255' };
 user.injectHost['home'] = '123.456.789.123';
 user.hosts; returns { home: '123.456.789.123', localhost: '127.0.0.1, mask: '255.255.255.255' }
 
