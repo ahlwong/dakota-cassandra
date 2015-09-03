@@ -414,7 +414,7 @@ user.friends; // returns ['Jenny', 'Alex', 'Cathy']
 // assuming schema hosts: { type: map<text,inet> }
 user.hosts = { localhost: '127.0.0.1', mask: '255.255.255.255' };
 user.injectHost['home'] = '123.456.789.123';
-user.hosts; returns { home: '123.456.789.123', localhost: '127.0.0.1, mask: '255.255.255.255' }
+user.hosts; returns { home: '123.456.789.123', localhost: '127.0.0.1', mask: '255.255.255.255' }
 
 });
 
