@@ -20,7 +20,8 @@ var RUN_TESTS = {
   userDefinedTypes: false,
   complexTypes: false,
   getterSetter: false,
-  counter: true
+  counter: true,
+  collections: false
 };
 
 // ===========
@@ -529,7 +530,13 @@ var dakota = new nmDakota(options, userDefinedTypes);
   
   var Counter = require('./models/counter')(dakota);
   
-  var counter = new Counter({ name: nmDakota.generateUUID(), email: 'dakota@dakota.com' });
+  var counter = new Counter({ name: nmDakota.generateUUID(), email: 'dakota@dakota.com', loc: 'SF' });
+  counter.increment('num', 5);
+  nmLogger.info(counter.changes('num'));
+  counter.decrement('num', 4);
+  nmLogger.info(counter.changes('num'));
+  counter.decrement('num', 1);
+  nmLogger.info(counter.changes('num'));
   counter.save(function(err) {
     if (err) {
       nmLogger.error(err);
@@ -540,3 +547,61 @@ var dakota = new nmDakota(options, userDefinedTypes);
   });
   
 })(RUN_TESTS.counter);
+
+// ===============
+// = Collections =
+// ===============
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var User = require('./models/user')(dakota);
+  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco' }, function(err) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      
+      user.add('projs', nmDakota.generateTimeUUID());
+      nmLogger.info(user.changes('projs'));
+      var timeUUID = nmDakota.generateTimeUUID();
+      user.add('projs', timeUUID);
+      nmLogger.info(user.changes('projs'));
+      user.remove('projs', timeUUID);
+      nmLogger.info(user.changes('projs'));
+      
+      user.append('thngs', 'dog');
+      nmLogger.info(user.changes('thngs'));
+      user.append('thngs', 'cat');
+      nmLogger.info(user.changes('thngs'));
+      user.remove('thngs', 'dog');
+      nmLogger.info(user.changes('thngs'));
+      user.remove('thngs', 'cat');
+      nmLogger.info(user.changes('thngs'));
+      user.append('thngs', 'sheep');
+      nmLogger.info(user.changes('thngs'));
+      user.prepend('thngs', 'dragon');
+      nmLogger.info(user.changes('thngs'));
+      
+      user.save(function(err) {
+        if (err) {
+          nmLogger.error(err);
+        }
+        else {
+          
+          User.where({ id: user.id, name: user.name, loc: user.loc }).first(function(err, user) {
+            if (err) {
+              nmLogger.error(err);
+            }
+            else {
+              
+              nmLogger.info(user.projs);
+            }
+          });
+        }
+      });
+    }
+  });
+  
+})(RUN_TESTS.collections);
