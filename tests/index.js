@@ -20,8 +20,9 @@ var RUN_TESTS = {
   userDefinedTypes: false,
   complexTypes: false,
   getterSetter: false,
-  counter: true,
-  collections: false
+  counter: false,
+  collections: false,
+  inject: true
 };
 
 // ===========
@@ -609,3 +610,45 @@ var dakota = new nmDakota(options, userDefinedTypes);
   });
   
 })(RUN_TESTS.collections);
+
+// ==========
+// = Inject =
+// ==========
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var User = require('./models/user')(dakota);
+  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco' }, function(err) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      
+      user.injectThng(0, 'dog');
+      user.injectHash('dog', '127.0.0.1');
+      user.injectHash('feline', '255.255.255.255');
+      
+      user.save(function(err) {
+        if (err) {
+          nmLogger.error(err);
+        }
+        else {
+          
+          User.where({ id: user.id, name: user.name, loc: user.loc }).first(function(err, user) {
+            if (err) {
+              nmLogger.error(err);
+            }
+            else {
+              
+              nmLogger.info(user.thngs);
+              nmLogger.info(user.hash);
+            }
+          });
+        }
+      });
+    }
+  });
+  
+})(RUN_TESTS.inject);
