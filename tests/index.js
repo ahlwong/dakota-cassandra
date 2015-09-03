@@ -620,7 +620,7 @@ var dakota = new nmDakota(options, userDefinedTypes);
   }
   
   var User = require('./models/user')(dakota);
-  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco' }, function(err) {
+  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco', thngs: ['bird', 'aligator'] }, function(err) {
     if (err) {
       nmLogger.error(err);
     }
