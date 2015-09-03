@@ -48,13 +48,13 @@ User.where({ name: 'Alex' }).first(function(err, user) { ... });
     - Callback / filter chains on `afterNew`, `beforeCreate`, `afterCreate`, `beforeValidate`, `afterValidate`, `beforeSave`, `afterSave`, `beforeDelete`
     - Define custom sanitizers and validators for fields
         - 'Recipes' for common and compositable validation and sanitization tasks
-        - ... examples include: `minLength`, `maxLength`, `required`, `email`
+        - ... examples include: `minLength`, `maxLength`, `required`, `email`, and more ...
         - User definable validation messages that can be output to user
     - Set column values with pre-generated setters and getters
     - `Append`, `prepend`, `add`, `remove`, `increment`, `decrement`, and `inject` convenience methods for working with collection types
   - Changed column tracking
     - Only updates or inserts changed fields
-    - Automatically composites multiple `append`, `increment`, and `set` actions
+    - Automatically combines multiple `append`, `prepend`, `add`, `remove`, `increment`, `decrement`, `inject` actions if they are additive or composes a single `set` action
   - Automatic `keyspace`, `table`, and `user defined type` schema rectification (configurable)
     - Detects and alerts on differences between schemas and structures
     - Automatically creates structures, adds columns, removes columns, or changes types and replication settings (configurable)
@@ -129,10 +129,10 @@ var defaultOptions = {
       return nm_i.pluralize(nm_s.underscored(modelName));
     },
     getterSetterName: function(columnName) {
-      return nm_s.underscored(columnName);
+      return columnName.trim().replace(/\s/g, '_');
     },
     typeSpecificSetterName: function(operation, columnName) {
-      var name = nm_s.capitalize(nm_s.underscored(columnName));
+      var name = nm_s.capitalize(columnName.trim().replace(/\s/g, '_'));
       if (operation == 'increment' || operation == 'decrement') {
         return operation + name;
       }
@@ -171,11 +171,11 @@ var defaultOptions = {
     - `queries` - log compiled query statements and params?
   - `model` dictates table discrepancy handling and general setup
     - `tableName` - function used to convert from model name to table name
-      - by default, a model named 'User' will create a table named 'users'
+      - by default, a model named 'UserByEmail' will create a table named 'user_by_emails'
     - `getterSetterName` - function used to name getters and setters for columns
-      - by default, a column names email will create `.email` and `.email =` methods
+      - by default, a column names 'email_addresses' will create `.email_addresses` and `.email_addresses =` methods
     - `typeSpecificSetterName` - function used to name getters and setters specific to certain types
-      - by default, a column named addresses of type list will create `.appendAddress`, `.prependAddress`, `.removeAddress`, and `.injectAddress` methods
+      - by default, a column named 'friend_uuids' of type list will create `.appendFriend_uuid`, `.prependFriend_uuid`, `.removeFriend_uuid`, and `.injectFriend_uuid` methods
       - the `operation` argument in this function is passed strings like 'append', 'prepend', etc...
     - `table.ensureExists` specifies the table discrepancy rectification policy
       - `run` - check existence of table, create if missing, and compare schema?

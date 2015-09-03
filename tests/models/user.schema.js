@@ -29,8 +29,6 @@ module.exports = {
     cnt: 'bigint',
     bits: 'blob',
     sub: 'boolean',
-    wht: 'decimal',
-    prc: 'double',
     qty: 'float',
     ip: 'inet',
     age: 'int',
@@ -52,7 +50,12 @@ module.exports = {
     
     // tuples
     tuples: 'tuple<text, int, text>',
-    nestedTuple: 'list<frozen <tuple<text, int, text>>>'
+    nestedTuple: 'list<frozen <tuple<text, int, text>>>',
+    
+    // aliases
+    wht: { type: 'decimal', alias: 'weight' },
+    prc: { type: 'double', alias: 'price' },
+    fuuids: { type: 'set<uuid>', alias: 'friendUUIDs' }
     
   },
   

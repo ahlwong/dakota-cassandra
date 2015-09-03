@@ -21,8 +21,9 @@ var RUN_TESTS = {
   complexTypes: false,
   getterSetter: false,
   counter: false,
-  collections: true,
-  inject: false
+  collections: false,
+  inject: false,
+  alias: true
 };
 
 // ===========
@@ -42,12 +43,40 @@ var options = {
   // keyspace
   keyspace: {
     replication: { 'class': 'SimpleStrategy', 'replication_factor': 1 },
-    durableWrites: true
+    durableWrites: true,
+    ensureExists: {
+      run: true, // check if keyspace exists and automaticcaly create it if it doesn't
+      alter: true // alter existing keyspace to match replication or durableWrites
+    }
   },
   
   // logging
-  logging: {
-    level: 'info'
+  logger: {
+    level: 'debug',
+    queries: true
+  },
+  
+  // model
+  model: {
+    table: {
+      ensureExists: {
+        run: true, // check if keyspace exists and automaticcaly create it if it doesn't
+        recreate: false, // drop and recreate table on schema mismatch, takes precedence over following options
+        recreateColumn: true,  // recreate columns where types don't match schema
+        removeExtra: true,  // remove extra columns not in schema
+        addMissing: true // add columns in schema that aren't in table
+      }
+    }
+  },
+  
+  // user defined type
+  userDefinedType: {
+    ensureExists: {
+      run: true,
+      recreate: false, // drop and recreate type on schema mismatch, takes precedence over following options
+      changeType: true, // change field types to match schema
+      addMissing: true // add fields in schema that aren't in type
+    }
   }
   
 };
@@ -658,3 +687,50 @@ var dakota = new nmDakota(options, userDefinedTypes);
   });
   
 })(RUN_TESTS.inject);
+
+// ==========
+// = Alias =
+// ==========
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var User = require('./models/user')(dakota);
+  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco', thngs: ['bird', 'aligator'] }, function(err) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      
+      user.weight = 135.0;
+      user.price = 1000000000;
+      var uuid = nmDakota.generateUUID();
+      user.friendUUIDs = [nmDakota.generateUUID(), uuid, nmDakota.generateUUID()];
+      console.log(user);
+      user.addFriendUUID(nmDakota.generateUUID());
+      user.removeFriendUUID(uuid);
+      nmLogger.info(user.changes());
+      
+      user.save(function(err) {
+        if (err) {
+          nmLogger.error(err);
+        }
+        else {
+          
+          User.where({ id: user.id, name: user.name, loc: user.loc }).first(function(err, user) {
+            if (err) {
+              nmLogger.error(err);
+            }
+            else {
+              
+              nmLogger.info(user.thngs);
+              nmLogger.info(user.hash);
+            }
+          });
+        }
+      });
+    }
+  });
+  
+})(RUN_TESTS.alias);
