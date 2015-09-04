@@ -429,6 +429,7 @@ user.email; // returns 'dakota@dakota.dakota'
 
 user.set('name', 'Dakota');
 user.get('name'); // returns 'Dakota'
+user.get(['name', 'email', ... ]); // returns { name: 'Dakota', email: 'dakota@dakota.dakota' }
 
 // assuming schema items: { type: list<text> }
 user.appendItem('item 1');
