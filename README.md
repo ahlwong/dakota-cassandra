@@ -313,13 +313,19 @@ user.save(function(err) {
   }
   ...
 });
+
+user.validate({ only: ['password'] });
+user.validate({ except: [email] });
+user.save(..., { validate: { only: [...] } });
+user.save(..., { validate: { except: [...] } });
 ```
  - `sanitizers` are run when a column's value is set
    - in the example above, our sanitizer downcases the user's email address
  - `validators` are run when the `.validate()` methods is explicitly called and on model `.save(...)`
    - if validation errors exist, an `Object` will be produced where the keys correspond to column names and the values are arrays of validation error messages
-   - `.validate()` returns a validation `Object` immediately on validation fail, and `false` on validation pass
-   - `.save()` is interrupted on validation errors and a `Dakota.Model.ValidationFailedError` is passed as the `err` argument to the callback
+   - `.validate(...)` returns a validation `Object` immediately on validation fail, and `false` on validation pass
+   - `.save(...)` is interrupted on validation errors and a `Dakota.Model.ValidationFailedError` is passed as the `err` argument to the callback
+   - both `.validate` and `.save` can take an options object that specify validations to `only` run on some columns or run on all columns `except` some
 
 ### Definition
 
