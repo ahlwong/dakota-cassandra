@@ -23,9 +23,9 @@ var RUN_TESTS = {
   getterSetter: false,
   counter: false,
   collections: false,
-  inject: false,
+  inject: true,
   alias: false,
-  instanceQueries: true
+  instanceQueries: false
 };
 
 // ===========
