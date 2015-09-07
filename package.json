@@ -1,6 +1,6 @@
 {
   "name": "dakota-cassandra",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Cassandra ORM for NodeJS",
   "main": "index.js",
   "dependencies": {
