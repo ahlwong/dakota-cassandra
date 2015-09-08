@@ -331,10 +331,12 @@ user.save(..., { validate: { except: [...] } });
 
 ```javascript
 var Dakota = require('dakota-cassandra');
+var nm_s = require('underscore.string');
+
 var validations = {
   ctime: {
     validator: {
-        validator: function(value) {
+        validator: function(value, instance) {
             return !nmValidator.isNull(value);
         },
         message: function(displayName) { return displayName + ' is required.'; }
@@ -353,7 +355,10 @@ var validations = {
   },
   name: {
     displayName: 'Name',
-    validator: [Dakota.Recipes.Validators.required, Dakota.Recipes.Validators.minLength(1)]
+    validator: [Dakota.Recipes.Validators.required, Dakota.Recipes.Validators.minLength(1)],
+    sanitizer: function(value, instance) {
+      return nm_s.capitalize(value);
+    }
   }
 };
 ```
@@ -363,6 +368,8 @@ var validations = {
     - `.validator.validator` is a a function that must return true or false based on its input value
     - `.validator.message` returns a custom message based on a passed in `displayName`
   - `.sanitizer` is an array of sanitizer functions or a single sanitization function
+  - Both `.validator` and `.sanitizer` are passed an optional argument `instance`, which refers to the model instance being validated
+  - Recipes for validators and sanitizers can be found under the `/lib/recipes` folder and are loaded under `Dakota.Rescipes.Validators` and `Dakota.Rescipes.Sanitizers`
 
 ## Creating and Deleting
 
