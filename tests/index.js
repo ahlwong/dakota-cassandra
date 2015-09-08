@@ -22,10 +22,11 @@ var RUN_TESTS = {
   complexTypes: false,
   getterSetter: false,
   counter: false,
-  collections: false,
+  collections: true,
   inject: true,
   alias: false,
-  instanceQueries: false
+  instanceQueries: false,
+  removeMapKey: true
 };
 
 // ===========
@@ -774,3 +775,59 @@ var Counter = require('./models/counter')(dakota);
   });
   
 })(RUN_TESTS.instanceQueries);
+
+// ==================
+// = Remove Map Key =
+// ==================
+
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco', hash: { dog: '127.0.0.1', cat: '127.0.0.1' } }, function(err) {
+    if (err) {
+      nmLogger.error(err);
+    }
+    else {
+      
+      user.removeHash('dog');
+      nmLogger.info(user.changes('hash'));
+      user.removeHash('cat');
+      nmLogger.info(user.changes('hash'));
+      
+      user.save(function(err) {
+        if (err) {
+          nmLogger.error(err);
+        }
+        else {
+          
+          nmLogger.info('User save successfully.');
+          
+          var user = User.create({ id: nmDakota.generateUUID(), name: 'asdf', email: 'dakota@dakota.com', loc: 'San Francisco', hash: { dog: '127.0.0.1', cat: '127.0.0.1' } }, function(err) {
+            if (err) {
+              nmLogger.error(err);
+            }
+            else {
+              
+              user.del = 5;
+              user.removeHash('dog');
+              user.injectHash('bird', '127.0.0.1');
+              nmLogger.info(user.changes());
+              
+              user.save(function(err) {
+                if (err) {
+                  nmLogger.error(err);
+                }
+                else {
+                  nmLogger.info('User save successfully.');
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+  
+})(RUN_TESTS.removeMapKey);

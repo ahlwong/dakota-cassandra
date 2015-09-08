@@ -458,8 +458,10 @@ user.friends; // returns ['Jenny', 'Alex', 'Cathy']
 
 // assuming schema hosts: { type: map<text,inet> }
 user.hosts = { localhost: '127.0.0.1', mask: '255.255.255.255' };
-user.injectHost['home'] = '123.456.789.123';
-user.hosts; returns { home: '123.456.789.123', localhost: '127.0.0.1', mask: '255.255.255.255' }
+user.injectHost('home', '123.456.789.123');
+user.hosts; // returns { home: '123.456.789.123', localhost: '127.0.0.1', mask: '255.255.255.255' }
+user.removeHost('mask');
+user.hosts; // returns { home: '123.456.789.123', localhost: '127.0.0.1' }
 
 });
 
@@ -472,8 +474,16 @@ userCounter.decrementCnt(7);
 userCounter.cnt; // returns 1
 
 });
-```
 
+```
+  - Single and multiple compatible calls to collection specific setters will modify collections without setting the whole column value
+    - ... for example, `.addFriend('Bob')` will compile into `friends = friends + {'Bob'}`
+    - ... likewise, `.addFriend('Bob')` followed by `.addFriend('Joe')` will compile into `friends = friends + {'Bob', 'Joe'}`
+    - ... however, `.addFriend('Bob')` followed by `.removeFriend('...')` will compile into `friends = {'Bob', ... }` since `add` and `remove` calls cannot be combined
+  - Single and multiple compatible calls to `.remove` on `map` typed columns will generate a `DELETE map1[key1], map2[key3] FROM...` query if performed in isolation
+    - ... for example, `.removeHost('mask')` will compile into `DELETE hosts['mask'] FROM users WHERE...`
+    - ... likewise, `.removeHost('mask')` followed by `.removeHost('home')` will compile into `DELETE hosts['mask'], hosts['home'] FROM users WHERE...`
+    - ... however, `.removeHost('mask')` followed by `.addFriend('Bob')` or `.injectHost('home', '123.456.789.123')` will compile into `hosts = { 'home' : '123.456.789.123' }` since `add` breaks isolation and `inject` cannot be combined
 ## Change Tracking
 
 ```javascript
