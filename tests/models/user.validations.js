@@ -3,14 +3,6 @@ var nmDakota = require('../../index');
 
 module.exports = {
   
-  // timestamps
-  ctime: {
-    validator: nmDakota.Recipes.Validators.required
-  },
-  utime: {
-    validator: nmDakota.Recipes.Validators.required
-  },
-  
   // data
   id: {
     validator: nmDakota.Recipes.Validators.required

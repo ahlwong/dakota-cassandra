@@ -246,13 +246,13 @@ var schema = {
     afterCreate: [],
     
     // validate
-    beforeValidate: [
-      Dakota.Recipes.Callbacks.setTimestampToNow('utime')
-    ],
+    beforeValidate: [],
     afterValidate: [],
     
     // save
-    beforeSave: [],
+    beforeSave: [
+      Dakota.Recipes.Callbacks.setTimestampToNow('utime')
+    ],
     afterSave: [],
     
     // delete

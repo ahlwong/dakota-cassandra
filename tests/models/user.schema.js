@@ -68,13 +68,13 @@ module.exports = {
     // new
     afterNew: [
       function(){ nmLogger.debug('afterNew callback'); },
-      nmDakota.Recipes.Callbacks.setUuid('id'),
-      nmDakota.Recipes.Callbacks.setTimestampToNow('ctime')
+      nmDakota.Recipes.Callbacks.setUuid('id')
     ],
     
     // create
     beforeCreate: [
-      function(){ nmLogger.debug('beforeCreate callback'); }
+      function(){ nmLogger.debug('beforeCreate callback'); },
+      nmDakota.Recipes.Callbacks.setTimestampToNow('ctime')
     ],
     afterCreate: [
       function(){ nmLogger.debug('afterCreate callback'); }
@@ -82,8 +82,7 @@ module.exports = {
     
     // validate
     beforeValidate: [
-      function(){ nmLogger.debug('beforeValidate callback'); },
-      nmDakota.Recipes.Callbacks.setTimestampToNow('utime')
+      function(){ nmLogger.debug('beforeValidate callback'); }
     ],
     afterValidate: [
       function(){ nmLogger.debug('afterValidate callback'); }
@@ -91,7 +90,8 @@ module.exports = {
     
     // save
     beforeSave: [
-      function(){ nmLogger.debug('beforeSave callback'); }
+      function(){ nmLogger.debug('beforeSave callback'); },
+      nmDakota.Recipes.Callbacks.setTimestampToNow('utime')
     ],
     afterSave: [
       function(){ nmLogger.debug('afterSave callback'); }
