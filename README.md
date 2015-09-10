@@ -289,6 +289,7 @@ var schema = {
     - composite keys should be grouped in a nested array
   - `schema.callbacks` defines chainable callbacks that are run in definition order for particular events
     - `Recipes` for common callbacks are provided in the `/lib/recipes` directory and are loaded under `Dakota.Rescipes.Callbacks`
+    - *NOTE* `beforeDelete` is not called if the model is deleted via any of the `.delete`, `.deleteAll`, or `.truncate` model static methods because the models are never loaded into memory
   - `schema.methods` defines instance methods available on each model instance
   - `schema.staticMethods` defines static methods on the model
 
@@ -389,6 +390,7 @@ user.timestamp(123456789).save(function(err) { ... });
 user.delete(function(err) { ... });
 user.ifExists(true).delete(function(err) { ... });
 
+User.where(...).delete(function(err) { ... });
 User.deleteAll(function(err) { ... });
 User.truncate(function(err) { ... });
 ```
@@ -397,6 +399,8 @@ User.truncate(function(err) { ... });
     - `User.create([assignments], callback)` immediately but asynchronously persists the object to the database
   - `.delete(callback)` deletes the model instance's corresponding row in the database
   - `.deleteAll(callback)` and `.truncate(callback)` are identical and remove all rows from a table
+  - *NOTE* that the `User.delete`, `User.deleteAll`, and `User.truncate` static methods do not run `beforeDelete` callbacks because the rows are never loaded into memory
+    - ... if callbacks must be run, consider a `User.where(...).eachRow(function(err, user) { user.delete(...) })`
   - `.ttl(...)`, `.timestamp(...)`, `.using(...)`, `.ifExists(...)`, `.ifNotExists(...)`, and `.if()` query chains can modify query parameters before `.delete(...)` or `.save(...)` compile and run the query on the database
 
 ## Querying
