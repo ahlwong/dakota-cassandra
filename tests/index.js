@@ -26,7 +26,8 @@ var RUN_TESTS = {
   inject: false,
   alias: false,
   instanceQueries: false,
-  removeMapKey: false
+  removeMapKey: false,
+  blindUpdates: true
 };
 
 // ===========
@@ -831,3 +832,41 @@ var Counter = require('./models/counter')(dakota);
   });
   
 })(RUN_TESTS.removeMapKey);
+
+// =================
+// = Blind Updates =
+// =================
+
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var user = User.update({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco'});
+  user.desc = 'QWERTY!';
+  user.set({ sgn: new Date(), qty: 5.0, thngs: ['dog', 'cat', 'bird'], hash: { home: '127.0.0.1' }, address: { street: '123 Main Street', city: 'San Francisco' } });
+  user.save(function(err) {
+    if (err) {
+      nmLogger.warn(err);
+    }
+    else {
+      nmLogger.info('User blind update set field success.')
+    }
+  });
+  
+  user = User.update({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco'});
+  user.injectHash('home', '127.0.0.1');
+  user.addProj(nmDakota.generateTimeUUID());
+  user.addProj(nmDakota.generateTimeUUID());
+  user.prependThng('dog');
+  user.removeAddress({ street: '123 Main Street', city: 'San Francisco' });
+  user.save(function(err) {
+    if (err) {
+      nmLogger.warn(err);
+    }
+    else {
+      nmLogger.info('User blind update collection specific operations success.')
+    }
+  });
+  
+})(RUN_TESTS.blindUpdates);
