@@ -22,11 +22,11 @@ var RUN_TESTS = {
   complexTypes: false,
   getterSetter: false,
   counter: false,
-  collections: true,
-  inject: true,
+  collections: false,
+  inject: false,
   alias: false,
   instanceQueries: false,
-  removeMapKey: true
+  removeMapKey: false
 };
 
 // ===========
