@@ -883,11 +883,15 @@ var Counter = require('./models/counter')(dakota);
     return;
   }
   
-  var user = User.new({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco'});
+  var user = User.new({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco', email: 'asdf@asdf.com' });
   user.listOfLists = [['arff', 'howl']];
+  nmLogger.info(user.changes());
   user.appendListOfList(['oink']);
+  nmLogger.info(user.changes());
   user.prependListOfList(['moooo']);
+  nmLogger.info(user.changes());
   user.removeListOfList(['oink']);
+  nmLogger.info(user.changes());
   user.save(function(err) {
     if (err) {
       nmLogger.warn(err);
