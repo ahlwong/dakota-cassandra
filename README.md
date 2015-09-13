@@ -549,6 +549,7 @@ userCounter.cnt; // returns 1
     - ... for example, `.removeHost('mask')` will compile into `DELETE hosts['mask'] FROM users WHERE...`
     - ... likewise, `.removeHost('mask')` followed by `.removeHost('home')` will compile into `DELETE hosts['mask'], hosts['home'] FROM users WHERE...`
     - ... however, `.removeHost('mask')` followed by `.addFriend('Bob')` or `.injectHost('home', '123.456.789.123')` will compile into `hosts = { 'home' : '123.456.789.123' }` since `add` breaks isolation and `inject` cannot be combined
+
 ## Change Tracking
 
 ```javascript
@@ -587,6 +588,21 @@ var dakota = new Dakota(options, userDefinedTypes);
   - The format of the `userDefinedTypes` argument should be an `Object` where each `key` is the `name` of the user defined type you'd like to define
   - The definition of each user defined type should be an `Object` that maps field names to types
 
+## Helpers
+
+```javascript
+var Dakota = require('dakota-cassandra');
+
+Dakota.generateUUID();
+
+Dakota.generateTimeUUID();
+Dakota.getDateFromTimeUUID(timeUUID);
+Dakota.getTimeFromTimeUUID(timeUUID);
+
+Dakota.nowToTimestamp();
+Dakota.dateToTimestamp(new Date());
+```
+  - Helpers for generating and manipulating `UUID` and `TimeUUID` are available as static methods
 ## Examples
 
 For an in-depth look at using Dakota, take a look inside the `/tests` folder.
