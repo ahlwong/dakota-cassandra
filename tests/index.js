@@ -30,7 +30,8 @@ var RUN_TESTS = {
   removeMapKey: false,
   blindUpdates: false,
   collectionOfCollections: false,
-  dbValidator: false
+  dbValidator: false,
+  injectNull: true
 };
 
 // ===========
@@ -654,6 +655,7 @@ var Counter = require('./models/counter')(dakota);
     else {
       
       user.injectThng(0, 'dog');
+      user.injectThng(1, 'cat');
       user.injectHash('dog', '127.0.0.1');
       user.injectHash('feline', '255.255.255.255');
       
@@ -671,6 +673,28 @@ var Counter = require('./models/counter')(dakota);
               
               nmLogger.info(user.thngs);
               nmLogger.info(user.hash);
+              
+              var user = User.update({ id: user.id, name: user.name, loc: user.loc });
+              user.injectThng(0, null);
+              user.injectHash('dog', null);
+              user.removeHash('feline');
+              user.save(function(err) {
+                if (err) {
+                  nmLogger.error(err);
+                }
+                else {
+                  
+                  User.where({ id: user.id, name: user.name, loc: user.loc }).first(function(err, user) {
+                    if (err) {
+                      nmLogger.error(err);
+                    }
+                    else {
+                      nmLogger.info(user.thngs);
+                    }
+                  });
+                }
+              });
+              
             }
           });
         }
@@ -926,3 +950,102 @@ var Counter = require('./models/counter')(dakota);
   });
   
 })(RUN_TESTS.dbValidator);
+
+// ===============
+// = Inject Null =
+// ===============
+
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var user = User.new({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco', email: 'asdf@asdf.com', thngs: ['a', 'b', 'c', 'd', 'e', 'f'] });
+  user.save(function(err) {
+    if (err) {
+      nmLogger.warn(err);
+    }
+    else {
+      nmLogger.info('Remove and inject null:');
+      user.removeThng('c');
+      nmLogger.info(user.changes('thngs'));
+      user.injectThng(1, null);
+      nmLogger.info(user.changes('thngs'));
+      
+      user.save(function(err) {
+        if (err) {
+          nmLogger.warn(err);
+        }
+        else {
+          nmLogger.info('Remove and inject null successful.');
+        }
+      });
+    }
+  });
+  
+  var user2 = User.new({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco', email: 'asdf@asdf.com', thngs: ['a', 'b', 'c', 'd', 'e', 'f'], hash: { home: '127.0.0.1', work: '127.0.0.1' } });
+  user2.save(function(err) {
+    if (err) {
+      nmLogger.warn(err);
+    }
+    else {
+      nmLogger.info('Inject null:')
+      user2.injectThng(1, null);
+      nmLogger.info(user2.changes('thngs'));
+      user2.injectHash('work', null);
+      nmLogger.info(user2.changes('hash'));
+      user2.removeHash('home');
+      nmLogger.info(user2.changes('hash'));
+      
+      user2.save(function(err) {
+        if (err) {
+          nmLogger.warn(err);
+        }
+        else {
+          nmLogger.info('Inject null successful.');
+        }
+      });
+    }
+  });
+  
+  var user3 = User.new({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco', email: 'asdf@asdf.com' });
+  user3.save(function(err) {
+    if (err) {
+      nmLogger.warn(err);
+    }
+    else {
+      nmLogger.info('Remove when empty:')
+      // user.injectThng(1, null);
+      // nmLogger.info(user.changes('thngs'));
+      user3.injectHash('work', null);
+      nmLogger.info(user3.changes('hash'));
+      user3.removeHash('home');
+      nmLogger.info(user3.changes('hash'));
+      
+      user3.save(function(err) {
+        if (err) {
+          nmLogger.warn(err);
+        }
+        else {
+          nmLogger.info('Remove when empty successful.');
+        }
+      });
+    }
+  });
+  
+  var user4 = User.update({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco', email: 'asdf@asdf.com' });
+  nmLogger.info('Blind update remove when empty:')
+  user4.injectHash('work', null);
+  nmLogger.info(user4.changes('hash'));
+  user4.removeHash('home');
+  nmLogger.info(user4.changes('hash'));
+  user4.save(function(err) {
+    if (err) {
+      nmLogger.warn(err);
+    }
+    else {
+      nmLogger.info('Blind update remove when empty successful.');
+    }
+  });
+  
+})(RUN_TESTS.injectNull);
