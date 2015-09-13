@@ -32,7 +32,7 @@ var RUN_TESTS = {
   collectionOfCollections: false,
   dbValidator: false,
   injectNull: false,
-  deleteCallbacks: true
+  deleteCallbacks: false
 };
 
 // ===========
