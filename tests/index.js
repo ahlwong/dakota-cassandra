@@ -31,7 +31,8 @@ var RUN_TESTS = {
   blindUpdates: false,
   collectionOfCollections: false,
   dbValidator: false,
-  injectNull: true
+  injectNull: false,
+  deleteCallbacks: true
 };
 
 // ===========
@@ -674,7 +675,7 @@ var Counter = require('./models/counter')(dakota);
               nmLogger.info(user.thngs);
               nmLogger.info(user.hash);
               
-              var user = User.update({ id: user.id, name: user.name, loc: user.loc });
+              var user = User.upsert({ id: user.id, name: user.name, loc: user.loc });
               user.injectThng(0, null);
               user.injectHash('dog', null);
               user.removeHash('feline');
@@ -869,7 +870,7 @@ var Counter = require('./models/counter')(dakota);
     return;
   }
   
-  var user = User.update({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco'});
+  var user = User.upsert({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco'});
   user.desc = 'QWERTY!';
   user.set({ sgn: new Date(), qty: 5.0, thngs: ['dog', 'cat', 'bird'], hash: { home: '127.0.0.1' }, address: { street: '123 Main Street', city: 'San Francisco' } });
   user.save(function(err) {
@@ -881,7 +882,7 @@ var Counter = require('./models/counter')(dakota);
     }
   });
   
-  user = User.update({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco'});
+  user = User.upsert({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco'});
   user.injectHash('home', '127.0.0.1');
   user.addProj(nmDakota.generateTimeUUID());
   user.addProj(nmDakota.generateTimeUUID());
@@ -1033,7 +1034,7 @@ var Counter = require('./models/counter')(dakota);
     }
   });
   
-  var user4 = User.update({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco', email: 'asdf@asdf.com' });
+  var user4 = User.upsert({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco', email: 'asdf@asdf.com' });
   nmLogger.info('Blind update remove when empty:')
   user4.injectHash('work', null);
   nmLogger.info(user4.changes('hash'));
@@ -1049,3 +1050,29 @@ var Counter = require('./models/counter')(dakota);
   });
   
 })(RUN_TESTS.injectNull);
+
+// ====================
+// = Delete Callbacks =
+// ====================
+
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  nmLogger.info('Delete with no callbacks');
+  User.where({ id: nmDakota.generateUUID(), name: 'no callbacks', loc: 'San Francisco'}).ifExists(true).delete(function(err) {
+    if (err) {
+      nmLogger.warn(err);
+    }
+  });
+  
+  nmLogger.info('Delete with callbacks');
+  var user = User.upsert({ id: nmDakota.generateUUID(), name: 'with callbacks', loc: 'San Francisco'});
+  user.delete(function(err) {
+    if (err) {
+      nmLogger.warn(err);
+    }
+  });
+  
+})(RUN_TESTS.deleteCallbacks);

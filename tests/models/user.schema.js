@@ -104,6 +104,9 @@ module.exports = {
     // delete
     beforeDelete: [
       function(){ nmLogger.debug('beforeDelete callback'); }
+    ],
+    afterDelete: [
+      function(){ nmLogger.debug('afterDelete callback'); }
     ]
   },
   

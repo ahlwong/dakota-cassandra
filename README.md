@@ -45,7 +45,7 @@ User.where({ name: 'Alex' }).first(function(err, user) { ... });
     - Support for `user defined types`, `counters`, `tuples`, and `frozen` fields
   - Schema validation, and sanitization backed models
     - Define custom setters, getters, instance, and static methods
-    - Callback / filter chains on `afterNew`, `beforeCreate`, `afterCreate`, `beforeValidate`, `afterValidate`, `beforeSave`, `afterSave`, `beforeDelete`
+    - Callback / filter chains on `afterNew`, `beforeCreate`, `afterCreate`, `beforeValidate`, `afterValidate`, `beforeSave`, `afterSave`, `beforeDelete`, `afterDelete`
     - Define custom sanitizers and validators for fields
         - 'Recipes' for common and chainable validation and sanitization tasks
         - ... examples include: `minLength`, `maxLength`, `required`, `email`, and more ...
@@ -224,7 +224,7 @@ var schema = {
     friends: 'set<uuid>',
     tags: 'list<text>',
     browsers: 'map<text,inet>',
-    craziness: 'list<frozen <tuple<text, int, text>>>'
+    craziness: 'list<frozen<tuple<text,int,text>>>'
     
   },
   
@@ -256,7 +256,8 @@ var schema = {
     afterSave: [],
     
     // delete
-    beforeDelete: []
+    beforeDelete: [],
+    afterDelete: []
   },
   
   // methods
@@ -289,7 +290,7 @@ var schema = {
     - composite keys should be grouped in a nested array
   - `schema.callbacks` defines chainable callbacks that are run in definition order for particular events
     - `Recipes` for common callbacks are provided in the `/lib/recipes` directory and are loaded under `Dakota.Rescipes.Callbacks`
-    - *NOTE* `beforeDelete` is not called if the model is deleted via any of the `.delete`, `.deleteAll`, or `.truncate` model static methods because the models are never loaded into memory
+    - *NOTE* there are cases when callbacks are skipped or ignored, please see the *Creating and Deleting* and *Upsert and Delete Without Reading* sections below for more details
   - `schema.methods` defines instance methods available on each model instance
   - `schema.staticMethods` defines static methods on the model
 
@@ -379,7 +380,21 @@ var User = dakota.addModel('User', schema, validations);
 var user = new User({ name: 'Dakota' });
 user.save(function(err) { ... });
 user = User.new({ name: 'Alex' });
-user.save(function(err) { ... });
+user.save(function(err) { ... }, {
+  ... ,
+  validate: {
+    only / except ...
+  },
+  callbacks: {
+    skipAll: false, // skips all callbacks, takes precedence over subsequent settings
+    skipBeforeValidate: false,
+    skipAfterValidate: false,
+    skipBeforeCreate: false,
+    skipAfterCreate: false,
+    skipBeforeSave: false,
+    skipAfterSave: false
+  }
+});
 user = User.create({ name: 'Cindy' }, function(err) { ... });
 
 user.if({ name: 'Dakota' }).save(function(err) { ... });
@@ -387,21 +402,60 @@ user.ifNotExists(true).ttl(1000).save(function(err) { ... });
 user.using({ '$ttl' : 1000, '$timestamp' : 123456789 }).save(function(err) { ... });
 user.timestamp(123456789).save(function(err) { ... });
 
-user.delete(function(err) { ... });
+user.delete(function(err) { ... }, {
+  ... ,
+  callbacks: {
+    skipAll: false, // skips all callbacks, takes precedence over subsequent settings
+    skipBeforeDelete: false,
+    skipAfterDelete: false
+  }
+});
 user.ifExists(true).delete(function(err) { ... });
-
-User.where(...).delete(function(err) { ... });
-User.deleteAll(function(err) { ... });
-User.truncate(function(err) { ... });
 ```
   - Instances of models can be created 3 different ways
     - `new User([assignments])` and `User.new([assignments])` are functionally identical and create an instance without immediately persisting it to the database
     - `User.create([assignments], callback)` immediately but asynchronously persists the object to the database
+    - *NOTE* both `.new` and `.create` will upsert records
+      - ... to only create new records, manually check if a record exists or use `.new` with `.ifNotExists`
   - `.delete(callback)` deletes the model instance's corresponding row in the database
-  - `.deleteAll(callback)` and `.truncate(callback)` are identical and remove all rows from a table
-  - *NOTE* that the `User.delete`, `User.deleteAll`, and `User.truncate` static methods do not run `beforeDelete` callbacks because the rows are never loaded into memory
-    - ... if callbacks must be run, consider a `User.where(...).eachRow(function(err, user) { user.delete(...) })`
+  - All callbacks will be run using the methods above since the entire record is presumed to be loaded
   - `.ttl(...)`, `.timestamp(...)`, `.using(...)`, `.ifExists(...)`, `.ifNotExists(...)`, and `.if()` query chains can modify query parameters before `.delete(...)` or `.save(...)` compile and run the query on the database
+  
+## Upsert and Delete Without Reading
+
+```javascript
+User.upsert({ name: 'Dakota' }, function(err){ ... }); // all callbacks run, except: afterNew, beforeCreate, afterCreate
+
+var user = User.upsert({ id: Dakota.generateUUID(), name: 'Dakota', email: 'dakota@dakota.dakota' });
+user.age = 15;
+user.appendTag('dog');
+user.save(function(err) { ... }); // all callbacks run, except: afterNew, beforeCreate, afterCreate
+
+var user = User.upsert({ id: Dakota.generateUUID(), name: 'Dakota', email: 'dakota@dakota.dakota' });
+user.delete(function(err) { ... }); // beforeDelete and afterDelete callbacks run
+
+User.delete({ name: 'Dakota' }, function(err) { ... }); // no callbacks run
+User.where(...).delete(function(err) { ... }); // no callbacks run
+User.where(...).ifExists(true).delete(function(err) { ... }); // no callbacks run
+
+User.deleteAll(function(err) { ... }); // no callbacks run
+User.truncate(function(err) { ... }); // no callbacks run
+```
+  - `User.upsert([assignments], [callback])` creates a special instance of a user object that prefers idempotent actions
+    - Since the entire record is not presumed to be loaded:
+      - columns can only be read after they are set
+      - columns are only validated if they are set
+      - collection specific operations like `$append`, `$prepend`, `$remove` will not combine into a `$set` on conflict
+      - `afterNew`, `beforeCreate`, `afterCreate` callbacks are not run
+    - You should ensure all primary keys are set prior to calling `.save` by defining them in the initial call to `.upsert` or setting the corresponding columns via conventional setters
+  - `User.upsert(...)` followed by `.delete(...)` will delete the record based on columns set in `.upsert` or via setters later
+    - This is the only delete without reading method that runs the `deleteAfter` callback
+  - `User.delete([where], [callback])` and `User.where([conditionals]).delete([callback])` behave identically
+    - `User.where(...)...` starts a query building object and allows for additional clauses to be appended, like `.ifExists`
+    - `beforeDelete` and `afterDelete` callbacks are not run
+  - `.deleteAll(callback)` and `.truncate(callback)` are functionally identical and remove all rows from a table
+    - `beforeDelete` and `afterDelete` callbacks are not run because the rows are never loaded into memory
+    - ... if callbacks must be run, consider a `User.where(...).eachRow(function(err, user) { user.delete(...) })`
 
 ## Querying
 
