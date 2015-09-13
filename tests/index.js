@@ -6,6 +6,7 @@ var nmLogger = require('../lib/logger');
 var nmQuery = require('../lib/query');
 var nmSchema = require('../lib/schema');
 var nmTable = require('../lib/table');
+var nmTypes = require('../lib/types');
 var nmUserDefinedType = require('../lib/user_defined_type');
 var nmWhen = require('when');
 var nm_ = require('underscore');
@@ -27,7 +28,9 @@ var RUN_TESTS = {
   alias: false,
   instanceQueries: false,
   removeMapKey: false,
-  blindUpdates: true
+  blindUpdates: false,
+  collectionOfCollections: true,
+  dbValidator: false
 };
 
 // ===========
@@ -870,3 +873,52 @@ var Counter = require('./models/counter')(dakota);
   });
   
 })(RUN_TESTS.blindUpdates);
+
+// =============================
+// = Collection of Collections =
+// =============================
+
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var user = User.new({ id: nmDakota.generateUUID(), name: 'asdf', loc: 'San Francisco'});
+  user.listOfLists = [['arff', 'howl']];
+  user.appendListOfList(['oink']);
+  user.prependListOfList(['moooo']);
+  user.removeListOfList(['oink']);
+  user.save(function(err) {
+    if (err) {
+      nmLogger.warn(err);
+    }
+    else {
+      nmLogger.info('User collection of collections success.')
+    }
+  });
+  
+})(RUN_TESTS.collectionOfCollections);
+
+// ================
+// = DB Validator =
+// ================
+
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  nm_.each([
+    'text',
+    'map<text,int>',
+    'set<map<text,map<text,int>>>',
+    'set<frozen<map<text,frozen<map<text,int>>>>>',
+    'list<frozen<tuple<text,int,text>>>',
+    'frozen<address>',
+    'list<frozen<address>>'
+  ], function(type, index) {
+    nmLogger.info(type);
+    nmLogger.info(nmTypes.dbValidator(dakota, type));
+  });
+  
+})(RUN_TESTS.dbValidator);

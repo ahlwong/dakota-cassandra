@@ -43,6 +43,10 @@ module.exports = {
     projs: 'set<timeuuid>',
     hash: 'map<text,inet>',
     thngs: 'list<text>',
+    listOfLists: 'list<frozen<list<text>>>',
+    setOfSets: 'set<frozen<set<text>>>',
+    mapOfMaps: 'map<text,frozen<map<text,int>>>',
+    setOfMaps: 'set<frozen<map<text,int>>>',
     
     // user defined types
     address: 'frozen <address>',
