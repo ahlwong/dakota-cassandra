@@ -446,15 +446,15 @@ User.truncate(function(err) { ... }); // no callbacks run
       - columns can only be read after they are set
       - columns are only validated if they are set
       - collection specific operations like `$append`, `$prepend`, `$remove` will not combine into a `$set` on conflict
-      - `afterNew`, `beforeCreate`, `afterCreate` callbacks are not run
+      - `afterNew`, `beforeCreate`, `afterCreate` callbacks are NOT run
     - You should ensure all primary keys are set prior to calling `.save` by defining them in the initial call to `.upsert` or setting the corresponding columns via conventional setters
   - `User.upsert(...)` followed by `.delete(...)` will delete the record based on columns set in `.upsert` or via setters later
-    - This is the only delete without reading method that runs the `deleteAfter` callback
+    - This is the only delete without reading method that runs the `beforeDelete` and `afterDelete` callbacks
   - `User.delete([where], [callback])` and `User.where([conditionals]).delete([callback])` behave identically
     - `User.where(...)...` starts a query building object and allows for additional clauses to be appended, like `.ifExists`
-    - `beforeDelete` and `afterDelete` callbacks are not run
+    - `beforeDelete` and `afterDelete` callbacks are NOT run
   - `.deleteAll(callback)` and `.truncate(callback)` are functionally identical and remove all rows from a table
-    - `beforeDelete` and `afterDelete` callbacks are not run because the rows are never loaded into memory
+    - `beforeDelete` and `afterDelete` callbacks are NOT run because the rows are never loaded into memory
     - ... if callbacks must be run, consider a `User.where(...).eachRow(function(err, user) { user.delete(...) })`
 
 ## Querying
@@ -602,7 +602,9 @@ Dakota.getTimeFromTimeUUID(timeUUID);
 Dakota.nowToTimestamp();
 Dakota.dateToTimestamp(new Date());
 ```
-  - Helpers for generating and manipulating `UUID` and `TimeUUID` are available as static methods
+  - Helpers for generating and manipulating `UUID` and `TimeUUID` are available as static methods on Dakota
+  - `.getDateFromTimeUUID` and `.getTimeFromTimeUUID` can be used to extra time and date data from TimeUUID strings and objects
+ 
 ## Examples
 
 For an in-depth look at using Dakota, take a look inside the `/tests` folder.
