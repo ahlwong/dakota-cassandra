@@ -29,7 +29,7 @@ var RUN_TESTS = {
   instanceQueries: false,
   removeMapKey: false,
   blindUpdates: false,
-  collectionOfCollections: true,
+  collectionOfCollections: false,
   dbValidator: false
 };
 
