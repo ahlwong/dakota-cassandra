@@ -32,7 +32,8 @@ var RUN_TESTS = {
   collectionOfCollections: false,
   dbValidator: false,
   injectNull: false,
-  deleteCallbacks: false
+  deleteCallbacks: false,
+  streams: true
 };
 
 // ===========
@@ -1076,3 +1077,33 @@ var Counter = require('./models/counter')(dakota);
   });
   
 })(RUN_TESTS.deleteCallbacks);
+
+// ===========
+// = Streams =
+// ===========
+
+(function(run) {
+  if (!run) {
+    return;
+  }
+  
+  var stream = User.stream()
+  .on('readable', function () {
+    //readable is emitted as soon a row is received and parsed
+    var user;
+    while (user = this.read()) {
+      // nmLogger.info('read user: ' + JSON.stringify(user));
+      nmLogger.info(user instanceof User);
+    }
+  })
+  .on('end', function () {
+    //stream ended, there aren't any more rows
+    nmLogger.info('stream ended');
+  })
+  .on('error', function (err) {
+    //Something went wrong: err is a response error from Cassandra
+    nmLogger.warn('stream error');
+    nmLogger.warn(err);
+  });
+  
+})(RUN_TESTS.streams);

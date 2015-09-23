@@ -65,7 +65,6 @@ User.where({ name: 'Alex' }).first(function(err, user) { ... });
 ## Missing But Coming
 
   - Indexes on tables
-  - Stream does not buffer queries until a successful connection
 
 ## Connection and Options
 
@@ -470,7 +469,21 @@ User.find({ name: 'Dakota', email: 'dakota@dakota.com' }, function(err, users) {
 User.findOne({ name: 'Dakota' }, function(err, user) { ... });
 
 User.eachRow(function(n, user) { ... }, function(err) { ... });
-User.stream();
+
+var stream = User.stream();
+stream.on('readable', function() {
+  // readable is emitted as soon a row is received and parsed
+  var user;
+  while (user = this.read()) {
+    ...
+  }
+});
+stream.on('end', function() {
+  // stream ended, there aren't any more rows
+});
+stream.on('error', function(err) {
+  // something went wrong: err is a response error from Cassandra
+});
 ```
   - There are a multitude of ways to dynamically query your data using the query builder
   - `.all(callback)`, `.first(callback)`, `.execute(callback)`, and `.count(callback)` methods terminate query building, compile your query, and submit it to the database; they should be used at the end of a query chain to execute the query
