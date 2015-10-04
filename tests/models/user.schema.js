@@ -72,7 +72,7 @@ module.exports = {
     // new
     afterNew: [
       function(){ nmLogger.debug('afterNew callback'); },
-      nmDakota.Recipes.Callbacks.setUuid('id')
+      nmDakota.Recipes.Callbacks.setUUID('id')
     ],
     
     // create
