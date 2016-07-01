@@ -130,6 +130,10 @@ var defaultOptions = {
     getterSetterName: function(columnName) {
       return columnName.trim().replace(/\s/g, '_');
     },
+    validatorSanitizerName: function(operation, columnName) {
+      var name = nm_s.capitalize(columnName.trim().replace(/\s/g, '_'));
+      return operation + name;
+    },
     typeSpecificSetterName: function(operation, columnName) {
       var name = nm_s.capitalize(columnName.trim().replace(/\s/g, '_'));
       if (operation == 'increment' || operation == 'decrement') {
@@ -173,6 +177,8 @@ var defaultOptions = {
       - by default, a model named 'UserByEmail' will create a table named 'user_by_emails'
     - `getterSetterName` - function used to name getters and setters for columns
       - by default, a column names 'email_addresses' will create `.email_addresses` and `.email_addresses =` methods
+    - `validatorSanitizerName` - function used to name validators and sanitizers for columns
+      - by default, a column names 'email_addresses' will create `.validateEmail`, `.sanitizeEmail`, and `.validateSanitizedEmail` methods
     - `typeSpecificSetterName` - function used to name getters and setters specific to certain types
       - by default, a column named 'friend_uuids' of type list will create `.appendFriend_uuid`, `.prependFriend_uuid`, `.removeFriend_uuid`, and `.injectFriend_uuid` methods
       - the `operation` argument in this function is passed strings like 'append', 'prepend', etc...
@@ -319,6 +325,12 @@ user.validate({ only: ['password'] });
 user.validate({ except: [email] });
 user.save(..., { validate: { only: [...] } });
 user.save(..., { validate: { except: [...] } });
+
+user.validatePassword('dak'); // returns { password: ['Password must contain at least one character and one number.', 'Password must be more than 6 characters
+user.sanitizeEmail('dAkOtA@dAKOta.DAkota'); // returns 'dakota@dakota.dakota'
+
+User.validatePassword('dak'); // returns { password: ['Password must contain at least one character and one number.', 'Password must be more than 6 characters
+User.sanitizeEmail('dAkOtA@dAKOta.DAkota'); // returns 'dakota@dakota.dakota'
 ```
  - `sanitizers` are run when a column's value is set
    - in the example above, our sanitizer downcases the user's email address
