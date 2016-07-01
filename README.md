@@ -176,9 +176,9 @@ var defaultOptions = {
     - `tableName` - function used to convert from model name to table name
       - by default, a model named 'UserByEmail' will create a table named 'user_by_emails'
     - `getterSetterName` - function used to name getters and setters for columns
-      - by default, a column names 'email_addresses' will create `.email_addresses` and `.email_addresses =` methods
+      - by default, a column named 'email_addresses' will create `.email_addresses` and `.email_addresses =` methods
     - `validatorSanitizerName` - function used to name validators and sanitizers for columns
-      - by default, a column names 'email_addresses' will create `.validateEmail`, `.sanitizeEmail`, and `.validateSanitizedEmail` methods
+      - by default, a column named 'email' will create `.validateEmail`, `.sanitizeEmail`, and `.validateSanitizedEmail` methods
     - `typeSpecificSetterName` - function used to name getters and setters specific to certain types
       - by default, a column named 'friend_uuids' of type list will create `.appendFriend_uuid`, `.prependFriend_uuid`, `.removeFriend_uuid`, and `.injectFriend_uuid` methods
       - the `operation` argument in this function is passed strings like 'append', 'prepend', etc...
